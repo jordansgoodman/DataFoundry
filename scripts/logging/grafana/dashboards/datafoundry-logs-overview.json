@@ -1,0 +1,52 @@
+{
+  "uid": "datafoundry-logs-overview",
+  "title": "DataFoundry Logs Overview",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["datafoundry", "logs"],
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "type": "logs",
+      "title": "Superset Logs",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "options": {"showLabels": true, "showTime": true, "sortOrder": "Descending"},
+      "targets": [{"expr": "{app=~\\\"superset-.*\\\"}", "refId": "A"}]
+    },
+    {
+      "type": "logs",
+      "title": "Airflow Logs",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "options": {"showLabels": true, "showTime": true, "sortOrder": "Descending"},
+      "targets": [{"expr": "{app=~\\\"airflow-.*\\\"}", "refId": "A"}]
+    },
+    {
+      "type": "logs",
+      "title": "Postgres + Redis Logs",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "options": {"showLabels": true, "showTime": true, "sortOrder": "Descending"},
+      "targets": [{"expr": "{app=~\\\"postgres|redis\\\"}", "refId": "A"}]
+    },
+    {
+      "type": "logs",
+      "title": "NGINX + Grafana + Loki",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "options": {"showLabels": true, "showTime": true, "sortOrder": "Descending"},
+      "targets": [{"expr": "{app=~\\\"nginx|grafana|loki\\\"}", "refId": "A"}]
+    },
+    {
+      "type": "logs",
+      "title": "Prometheus + Node Exporter",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+      "options": {"showLabels": true, "showTime": true, "sortOrder": "Descending"},
+      "targets": [{"expr": "{app=~\\\"prometheus|node-exporter\\\"}", "refId": "A"}]
+    }
+  ]
+}

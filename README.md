@@ -27,6 +27,12 @@ This stack includes Grafana + Loki + Promtail for local log aggregation.
 - Grafana: `http://<host>/grafana/` (defaults in `.env.example`)
 - Logs flow: Docker containers -> Promtail -> Loki -> Grafana
 - Services are labeled with `logging=promtail` so Promtail only ingests those containers.
+- Dashboards: `DataFoundry Logs` and `DataFoundry Logs Overview`
+
+## System Metrics
+System metrics are collected with Prometheus + Node Exporter and visualized in Grafana.
+The “DataFoundry System Metrics” dashboard is auto-provisioned.
+Alert rules for CPU, memory, disk, and node exporter are included in Prometheus.
 
 ## Single URL Access
 All UIs are routed through NGINX:
