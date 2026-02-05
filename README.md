@@ -84,7 +84,7 @@ Make sure `.env` sets:
 ## Detailed Setup Flow
 This is what happens when you run the bootstrap:
 
-1. Validates `.env` exists
+1. Generates `.env` if missing (writes credentials to `data/credentials.txt`)
 2. Linux only: installs Ansible if missing
 3. Linux only: uses Ansible to install Docker and Docker Compose plugin
 4. Creates persistent data directories under `./data`
@@ -134,14 +134,11 @@ Once you are inside the Ubuntu VM:
    - `git clone <your-repo-url> DataFoundry`
 4. Go to the repo:
    - `cd DataFoundry`
-5. Create `.env`:
-   - `cp .env.example .env`
-   - Edit `.env` and set secrets.
-6. Run the installer:
+5. Run the installer:
    - `./bootstrap.sh`
-7. Trigger the NYC Taxi load:
+6. Trigger the NYC Taxi load:
    - `docker compose exec airflow-webserver airflow dags trigger nyc_taxi_full_refresh`
-8. Open services:
+7. Open services:
    - Superset: `http://<vm-ip>/superset/`
    - Airflow: `http://<vm-ip>/airflow/`
 
@@ -235,7 +232,7 @@ and adjust values for your environment.
 - All analytics tooling runs in containers.
 
 ## Production Readiness Checklist
-- [ ] Change all default credentials in `.env`
+- [ ] Store `data/credentials.txt` securely and rotate credentials if needed
 - [ ] Set strong `SUPERSET_SECRET_KEY` and `AIRFLOW__CORE__FERNET_KEY`
 - [ ] Enable TLS in NGINX and install certificates
 - [ ] Configure IP allowlist or SSO

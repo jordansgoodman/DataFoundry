@@ -1,7 +1,7 @@
 # Go-Live Checklist
 
 ## Before Cutover
-- [ ] Change all default credentials in `.env`
+- [ ] Store `data/credentials.txt` securely and rotate credentials if needed
 - [ ] Set `SUPERSET_SECRET_KEY` and `AIRFLOW__CORE__FERNET_KEY`
 - [ ] Enable TLS in NGINX
 - [ ] Configure IP allowlist or SSO
