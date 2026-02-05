@@ -1,0 +1,55 @@
+{
+  "uid": "datafoundry-logs",
+  "title": "DataFoundry Logs",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["datafoundry", "logs"],
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Log Volume By App",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "sum by (app) (count_over_time({app=~\".+\"}[1m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate By App",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "sum by (app) (count_over_time({app=~\".+\"} |= \"error\"[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "All App Logs",
+      "datasource": {"type": "loki", "uid": "-1"},
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8},
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "expr": "{app=~\".+\"}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

@@ -24,9 +24,20 @@ Trigger it after the stack is up:
 ## Logging And Observability
 This stack includes Grafana + Loki + Promtail for local log aggregation.
 
-- Grafana: `http://<host>:3000` (defaults in `.env.example`)
+- Grafana: `http://<host>/grafana/` (defaults in `.env.example`)
 - Logs flow: Docker containers -> Promtail -> Loki -> Grafana
 - Services are labeled with `logging=promtail` so Promtail only ingests those containers.
+
+## Single URL Access
+All UIs are routed through NGINX:
+
+- Superset: `http://<host>/superset/`
+- Airflow: `http://<host>/airflow/`
+- Grafana: `http://<host>/grafana/`
+
+Make sure `.env` sets:
+- `SUPERSET_BASE_URL=http://<host>/superset`
+- `AIRFLOW__WEBSERVER__BASE_URL=http://<host>/airflow`
 
 ## Testing On Ubuntu VM (from macOS)
 Once you are inside the Ubuntu VM:
