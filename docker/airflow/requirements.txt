@@ -4,3 +4,4 @@ requests==2.32.3
 psycopg2-binary==2.9.9
 SQLAlchemy==1.4.52
 dlt==1.6.0
+statsd==4.0.1
