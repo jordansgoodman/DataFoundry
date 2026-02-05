@@ -174,6 +174,10 @@ See `RUNBOOK.md` for incident response steps.
 ## Smoke Tests
 - `./scripts/healthcheck/smoke_test.sh` checks key endpoints and Postgres.
 
+## Reset (Dev Only)
+- `./reset.sh` wipes `./data` and reboots the stack
+- `./reset.sh --keep-env` preserves `.env` and credentials
+
 ## Go-Live
 See `GO_LIVE.md` for a production cutover checklist.
 
