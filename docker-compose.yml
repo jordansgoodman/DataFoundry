@@ -342,7 +342,8 @@ services:
       PGADMIN_LISTEN_PORT: 5050
     volumes:
       - ./data/pgadmin:/var/lib/pgadmin
-      - ./scripts/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./data/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./data/pgadmin/pgpass:/var/lib/pgadmin/pgpass:ro
     networks: [df]
   statsd-exporter:
     image: prom/statsd-exporter:v0.26.1

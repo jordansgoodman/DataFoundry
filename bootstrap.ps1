@@ -4,6 +4,33 @@ if (!(Test-Path ".env")) {
   Write-Host "No .env found. Generating defaults..."
   & python scripts/setup/generate_env.py
 }
+if (Test-Path ".env") {
+  $envMap = @{}
+  Get-Content .env | ForEach-Object {
+    if ($_ -and ($_ -notmatch '^#') -and ($_ -match '=')) {
+      $parts = $_.Split('=', 2)
+      $envMap[$parts[0]] = $parts[1]
+    }
+  }
+  New-Item -ItemType Directory -Force -Path "data/pgadmin" | Out-Null
+  $servers = @"
+{
+  "Servers": {
+    "1": {
+      "Name": "DataFoundry Postgres",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "$($envMap['POSTGRES_DB'])",
+      "Username": "$($envMap['POSTGRES_USER'])",
+      "SSLMode": "prefer"
+    }
+  }
+}
+"@
+  $servers | Out-File -FilePath "data/pgadmin/servers.json" -Encoding utf8
+  "$('postgres'):5432:$($envMap['POSTGRES_DB']):$($envMap['POSTGRES_USER']):$($envMap['POSTGRES_PASSWORD'])" | Out-File -FilePath "data/pgadmin/pgpass" -Encoding ascii
+}
 
 Write-Host "Windows host detected. Skipping Ansible host setup."
 Write-Host "Ensure Docker Desktop is installed and running (WSL2 backend recommended)."

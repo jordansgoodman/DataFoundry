@@ -6,6 +6,8 @@ if [[ ! -f .env ]]; then
   python3 scripts/setup/generate_env.py
 fi
 
+./scripts/pgadmin/bootstrap_pgadmin.sh
+
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker not found. Install Docker Engine (Linux) or Docker Desktop."
   exit 1

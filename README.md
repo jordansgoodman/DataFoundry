@@ -76,6 +76,10 @@ All UIs are routed through NGINX:
 - Grafana: `http://<host>/grafana/`
 - pgAdmin: `http://<host>/pgadmin/`
 
+## DB Tools
+pgAdmin is pre-configured with the Postgres server and password on first boot.
+Credentials are available in `data/credentials.txt`.
+
 Make sure `.env` sets:
 - `SUPERSET_BASE_URL=http://<host>/superset`
 - `AIRFLOW__WEBSERVER__BASE_URL=http://<host>/airflow`
