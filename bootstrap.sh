@@ -21,11 +21,4 @@ if [[ ! -f data/.superset_initialized ]]; then
   touch data/.superset_initialized
 fi
 
-# dbt run (optional)
-if [[ ! -f data/.dbt_initialized ]]; then
-  echo "Running dbt seed/run/test..."
-  docker compose -f docker-compose.yml run --rm dbt bash -c "dbt seed && dbt run && dbt test"
-  touch data/.dbt_initialized
-fi
-
 echo "DataFoundry is up."

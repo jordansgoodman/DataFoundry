@@ -9,6 +9,10 @@
     - "{{ playbook_dir }}/../data/redis"
     - "{{ playbook_dir }}/../data/superset"
     - "{{ playbook_dir }}/../data/airflow"
+    - "{{ playbook_dir }}/../data/logging"
+    - "{{ playbook_dir }}/../data/logging/loki"
+    - "{{ playbook_dir }}/../data/logging/promtail"
+    - "{{ playbook_dir }}/../data/logging/grafana"
 
 - name: Compose up
   command: docker compose -f {{ playbook_dir }}/../docker-compose.yml up -d

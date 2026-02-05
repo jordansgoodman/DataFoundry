@@ -14,6 +14,20 @@ Local-first, self-hosted analytics stack with one-command install.
 
 The bootstrap script installs Docker (via Ansible), brings up services, and runs first-run initialization.
 
+## Data Ingestion (dlt + Airflow)
+The Airflow DAG `nyc_taxi_full_refresh` uses dlt to load NYC Taxi data into Postgres
+and then auto-registers the dataset in Superset.
+
+Trigger it after the stack is up:
+- `docker compose exec airflow-webserver airflow dags trigger nyc_taxi_full_refresh`
+
+## Logging And Observability
+This stack includes Grafana + Loki + Promtail for local log aggregation.
+
+- Grafana: `http://<host>:3000` (defaults in `.env.example`)
+- Logs flow: Docker containers -> Promtail -> Loki -> Grafana
+- Services are labeled with `logging=promtail` so Promtail only ingests those containers.
+
 ## Testing On Ubuntu VM (from macOS)
 Once you are inside the Ubuntu VM:
 
@@ -36,11 +50,16 @@ Once you are inside the Ubuntu VM:
    - Superset: `http://<vm-ip>/superset/`
    - Airflow: `http://<vm-ip>/airflow/`
 
+## Defaults
+This repo ships with development-friendly defaults in `.env.example` (admin creds, passwords, secret keys).
+Change them before using this in any real environment.
+
 ## Structure
 - `bootstrap.sh` one-command installer
 - `ansible/` host configuration and deploy
 - `docker-compose.yml` runtime services
 - `scripts/` init and bootstrap helpers
+- `scripts/dlt/` data ingestion pipelines
 
 ## Notes
 - Host Python is used only for Ansible.
