@@ -1,7 +1,7 @@
 .PHONY: up down logs restart init
 
 up:
-	./bootstrap-dev.sh
+	./bootstrap.sh
 
 down:
 	docker compose down

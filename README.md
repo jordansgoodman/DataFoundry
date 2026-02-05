@@ -5,7 +5,6 @@ Local-first, self-hosted analytics stack with one-command install.
 ## What this is
 - Single-node analytics appliance
 - Docker Compose runtime
-- Ansible-managed host setup
 - Opinionated defaults, minimal config
 
 ## Core Principles
@@ -32,11 +31,10 @@ Local-first, self-hosted analytics stack with one-command install.
 
 ## Quick start
 1. Run the bootstrap for your OS (it auto-generates `.env` and credentials on first run):
-   - Linux: `./bootstrap.sh`
-   - macOS: `./bootstrap-dev.sh`
+   - Linux/macOS: `./bootstrap.sh`
    - Windows (PowerShell): `./bootstrap.ps1`
 
-The bootstrap script installs Docker (via Ansible), brings up services, and runs first-run initialization.
+The bootstrap script brings up services and runs first-run initialization (Docker and Python 3 must already be installed).
 
 ## Data Ingestion (dlt + Airflow)
 The Airflow DAG `nyc_taxi_full_refresh` uses dlt to load NYC Taxi data into Postgres
@@ -85,14 +83,13 @@ Make sure `.env` sets:
 This is what happens when you run the bootstrap:
 
 1. Generates `.env` if missing (writes credentials to `data/credentials.txt`)
-2. Linux only: installs Ansible if missing
-3. Linux only: uses Ansible to install Docker and Docker Compose plugin
-4. Creates persistent data directories under `./data`
-5. Starts the Docker Compose stack
-6. Runs Superset first-run initialization
-7. Leaves the stack running behind NGINX
+2. Verifies Docker is installed and running
+3. Creates persistent data directories under `./data`
+4. Starts the Docker Compose stack
+5. Runs Superset first-run initialization
+6. Leaves the stack running behind NGINX
 
-On macOS/Windows, the bootstrap skips all host configuration and assumes Docker Desktop is already running.
+On macOS/Windows, the bootstrap assumes Docker Desktop is already running.
 
 ## First-Run Behavior
 On first install, the system:
@@ -194,14 +191,12 @@ See `RETENTION.md` for log, metrics, and backup retention guidance.
 See `DISASTER_RECOVERY.md` for rebuild and restore steps.
 
 ## Cross-Platform Notes
-- Linux: full host setup via Ansible.
-- macOS/Windows: skips Ansible and expects Docker Desktop.
-- Windows: use `bootstrap.ps1` in PowerShell.
+- Linux/macOS: requires Docker installed locally.
+- Windows: use `bootstrap.ps1` in PowerShell (Docker Desktop required).
 - Optional: `make up`, `make down`, `make logs`, `make init` for common tasks.
 
 ## Structure
 - `bootstrap.sh` one-command installer
-- `ansible/` host configuration and deploy
 - `docker-compose.yml` runtime services
 - `docker-compose.override.yml.example` optional resource limits
 - `scripts/` init and bootstrap helpers
@@ -232,7 +227,6 @@ To enforce container limits, copy `docker-compose.override.yml.example` to `dock
 and adjust values for your environment.
 
 ## Notes
-- Host Python is used only for Ansible.
 - All analytics tooling runs in containers.
 
 ## Production Readiness Checklist
