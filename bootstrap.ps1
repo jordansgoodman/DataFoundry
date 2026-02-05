@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 if (!(Test-Path ".env")) {
-  Write-Host "Missing .env. Copy .env.example to .env and fill in values."
-  exit 1
+  Write-Host "No .env found. Generating defaults..."
+  & python scripts/setup/generate_env.py
 }
 
 Write-Host "Windows host detected. Skipping Ansible host setup."

@@ -31,8 +31,7 @@ Local-first, self-hosted analytics stack with one-command install.
 - StatsD Exporter: Airflow metrics bridge
 
 ## Quick start
-1. Copy `.env.example` to `.env` and fill in values.
-2. Run the bootstrap for your OS:
+1. Run the bootstrap for your OS (it auto-generates `.env` and credentials on first run):
    - Linux: `./bootstrap.sh`
    - macOS: `./bootstrap-dev.sh`
    - Windows (PowerShell): `./bootstrap.ps1`
@@ -147,8 +146,8 @@ Once you are inside the Ubuntu VM:
    - Airflow: `http://<vm-ip>/airflow/`
 
 ## Defaults
-This repo ships with development-friendly defaults in `.env.example` (admin creds, passwords, secret keys).
-Change them before using this in any real environment.
+On first run, `.env` is generated automatically with strong random defaults.
+Credentials are written to `data/credentials.txt`.
 
 ## Backups And Restore
 - Backup Postgres:

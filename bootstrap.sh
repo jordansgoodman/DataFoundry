@@ -2,8 +2,8 @@
 set -euo pipefail
 
 if [[ ! -f .env ]]; then
-  echo "Missing .env. Copy .env.example to .env and fill in values."
-  exit 1
+  echo "No .env found. Generating defaults..."
+  python3 scripts/setup/generate_env.py
 fi
 
 OS_NAME="$(uname -s)"
