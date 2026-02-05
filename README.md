@@ -63,6 +63,14 @@ Alert rules for CPU, memory, disk, and node exporter are included in Prometheus.
 Airflow emits StatsD metrics which are scraped by Prometheus via `statsd-exporter`.
 Alerts trigger when task failures occur.
 
+## Alert Routing (Slack-ready)
+Prometheus sends alerts to Alertmanager. A Slack receiver template is included.
+To enable Slack:
+- Edit `scripts/metrics/alertmanager/alertmanager.yml` and replace the webhook URL.
+- Set the Slack channel name (default: `#datafoundry-alerts`).
+- Restart Alertmanager: `docker compose up -d alertmanager`
+- Trigger a test by stopping node-exporter briefly and confirm Slack alerts arrive.
+
 ## Single URL Access
 All UIs are routed through NGINX:
 
@@ -95,6 +103,7 @@ On first install, the system:
 - Registers the Postgres connection in Superset
 - Registers the NYC Taxi dataset in Superset
 - Creates a starter Superset dashboard
+- Triggers the NYC Taxi ingestion DAG once
 
 ## Service Map
 Services are all on the internal Docker network `df` and exposed only via NGINX.
@@ -141,6 +150,49 @@ Once you are inside the Ubuntu VM:
 This repo ships with development-friendly defaults in `.env.example` (admin creds, passwords, secret keys).
 Change them before using this in any real environment.
 
+## Backups And Restore
+- Backup Postgres:
+  - `./scripts/backup/postgres_backup.sh`
+- Restore Postgres:
+  - `./scripts/backup/postgres_restore.sh <backup.sql.gz>`
+- Scheduled backup (cron):
+- `./scripts/backup/backup_run.sh` (uses `BACKUP_RETENTION_DAYS`, default 7)
+- Cron example: `scripts/backup/backup_cron.example`
+- Systemd example: `scripts/backup/datafoundry-backup.service` + `scripts/backup/datafoundry-backup.timer`
+
+## Upgrades
+See `UPGRADE.md` for a safe upgrade and rollback process.
+
+## Security Hardening
+See `scripts/security/README.md` for TLS and access control guidance.
+
+## SSO
+See `scripts/security/SSO.md` for OIDC/OAuth guidance.
+
+## Governance
+See `GOVERNANCE.md` for role guidance and access policies.
+
+## Runbook
+See `RUNBOOK.md` for incident response steps.
+
+## Smoke Tests
+- `./scripts/healthcheck/smoke_test.sh` checks key endpoints and Postgres.
+
+## Go-Live
+See `GO_LIVE.md` for a production cutover checklist.
+
+## Backup Verification
+- `./scripts/backup/backup_verify.sh <backup.sql.gz>`
+
+## Capacity Testing
+See `LOAD_TEST.md` for a suggested load-testing plan.
+
+## Retention Policy
+See `RETENTION.md` for log, metrics, and backup retention guidance.
+
+## Disaster Recovery
+See `DISASTER_RECOVERY.md` for rebuild and restore steps.
+
 ## Cross-Platform Notes
 - Linux: full host setup via Ansible.
 - macOS/Windows: skips Ansible and expects Docker Desktop.
@@ -151,6 +203,7 @@ Change them before using this in any real environment.
 - `bootstrap.sh` one-command installer
 - `ansible/` host configuration and deploy
 - `docker-compose.yml` runtime services
+- `docker-compose.override.yml.example` optional resource limits
 - `scripts/` init and bootstrap helpers
 - `scripts/dlt/` data ingestion pipelines
 
@@ -169,6 +222,27 @@ Key variables:
 - `GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD`
 - `NYC_TAXI_URL`
 
+## Resource Sizing (Single Node)
+Recommended starting point:
+- 4 vCPU / 16 GB RAM / 200+ GB disk for pilot usage
+- 8 vCPU / 32 GB RAM / 500+ GB disk for heavier analytics
+
+## Resource Limits (Optional)
+To enforce container limits, copy `docker-compose.override.yml.example` to `docker-compose.override.yml`
+and adjust values for your environment.
+
 ## Notes
 - Host Python is used only for Ansible.
 - All analytics tooling runs in containers.
+
+## Production Readiness Checklist
+- [ ] Change all default credentials in `.env`
+- [ ] Set strong `SUPERSET_SECRET_KEY` and `AIRFLOW__CORE__FERNET_KEY`
+- [ ] Enable TLS in NGINX and install certificates
+- [ ] Configure IP allowlist or SSO
+- [ ] Configure Alertmanager Slack webhook
+- [ ] Verify backups run and retention is configured
+- [ ] Run `./scripts/healthcheck/smoke_test.sh`
+- [ ] Run a backup verification test
+- [ ] Confirm dashboards load and refresh
+- [ ] Validate restore procedure in a staging environment

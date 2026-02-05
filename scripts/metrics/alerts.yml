@@ -10,6 +10,15 @@ groups:
           summary: "Node Exporter is down"
           description: "No metrics from node_exporter for 2 minutes."
 
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus target down"
+          description: "One or more Prometheus scrape targets are down."
+
       - alert: HighCPUUsage
         expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
         for: 5m

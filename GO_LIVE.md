@@ -1,0 +1,21 @@
+# Go-Live Checklist
+
+## Before Cutover
+- [ ] Change all default credentials in `.env`
+- [ ] Set `SUPERSET_SECRET_KEY` and `AIRFLOW__CORE__FERNET_KEY`
+- [ ] Enable TLS in NGINX
+- [ ] Configure IP allowlist or SSO
+- [ ] Configure Alertmanager Slack webhook
+- [ ] Verify backups run and retention is configured
+- [ ] Run smoke tests
+
+## Cutover
+- [ ] Schedule maintenance window
+- [ ] Apply latest images and restart stack
+- [ ] Validate UI access via NGINX routes
+- [ ] Trigger NYC Taxi ingest (or your production DAGs)
+
+## After Cutover
+- [ ] Confirm alerts are firing to Slack (test alert)
+- [ ] Confirm dashboards load and refresh
+- [ ] Confirm backups exist and are readable

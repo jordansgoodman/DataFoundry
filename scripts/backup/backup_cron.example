@@ -1,0 +1,2 @@
+# Run daily at 2:15 AM
+15 2 * * * /bin/bash -lc 'cd /opt/datafoundry && ./scripts/backup/backup_run.sh >> ./backups/backup.log 2>&1'

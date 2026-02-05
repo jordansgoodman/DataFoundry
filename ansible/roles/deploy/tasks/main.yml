@@ -15,6 +15,7 @@
     - "{{ playbook_dir }}/../data/logging/grafana"
     - "{{ playbook_dir }}/../data/metrics"
     - "{{ playbook_dir }}/../data/metrics/prometheus"
+    - "{{ playbook_dir }}/../data/metrics/alertmanager"
 
 - name: Compose up
   command: docker compose -f {{ playbook_dir }}/../docker-compose.yml up -d
