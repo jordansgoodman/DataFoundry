@@ -1,0 +1,10 @@
+name: datafoundry
+version: '1.0.0'
+profile: datafoundry
+config-version: 2
+
+model-paths: ["models"]
+
+models:
+  datafoundry:
+    +materialized: view

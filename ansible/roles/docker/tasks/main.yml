@@ -1,0 +1,12 @@
+- name: Install Docker from Ubuntu repo
+  apt:
+    name:
+      - docker.io
+      - docker-compose-plugin
+    state: present
+
+- name: Enable and start Docker
+  service:
+    name: docker
+    state: started
+    enabled: true
