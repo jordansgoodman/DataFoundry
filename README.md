@@ -14,6 +14,28 @@ Local-first, self-hosted analytics stack with one-command install.
 
 The bootstrap script installs Docker (via Ansible), brings up services, and runs first-run initialization.
 
+## Testing On Ubuntu VM (from macOS)
+Once you are inside the Ubuntu VM:
+
+1. Update packages:
+   - `sudo apt-get update`
+2. Install basics:
+   - `sudo apt-get install -y git python3 python3-pip`
+3. Clone the repo:
+   - `git clone <your-repo-url> DataFoundry`
+4. Go to the repo:
+   - `cd DataFoundry`
+5. Create `.env`:
+   - `cp .env.example .env`
+   - Edit `.env` and set secrets.
+6. Run the installer:
+   - `./bootstrap.sh`
+7. Trigger the NYC Taxi load:
+   - `docker compose exec airflow-webserver airflow dags trigger nyc_taxi_full_refresh`
+8. Open services:
+   - Superset: `http://<vm-ip>/superset/`
+   - Airflow: `http://<vm-ip>/airflow/`
+
 ## Structure
 - `bootstrap.sh` one-command installer
 - `ansible/` host configuration and deploy
