@@ -1,4 +1,4 @@
-FROM apache/airflow:2.8.4
+FROM apache/airflow:2.9.3-python3.11
 
 USER root
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
