@@ -16,6 +16,7 @@ KEYS_TO_GEN = {
     "AIRFLOW_ADMIN_PASSWORD": 24,
     "REDIS_PASSWORD": 24,
     "GRAFANA_ADMIN_PASSWORD": 24,
+    "PGADMIN_PASSWORD": 24,
 }
 
 if not ENV_EXAMPLE.exists():
@@ -40,6 +41,7 @@ values["AIRFLOW__CORE__FERNET_KEY"] = base64.urlsafe_b64encode(secrets.token_byt
 values.setdefault("DF_HOSTNAME", DEFAULT_HOST)
 values["SUPERSET_BASE_URL"] = f"http://{DEFAULT_HOST}/superset"
 values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}/airflow"
+values["PGADMIN_EMAIL"] = "admin@datafoundry.local"
 
 # Read example and write .env
 lines = []
@@ -73,6 +75,9 @@ creds = [
     "",
     f"Grafana admin: admin",
     f"Grafana password: {values['GRAFANA_ADMIN_PASSWORD']}",
+    "",
+    f"pgAdmin email: {values['PGADMIN_EMAIL']}",
+    f"pgAdmin password: {values['PGADMIN_PASSWORD']}",
 ]
 CREDS_FILE.write_text("\n".join(creds) + "\n")
 

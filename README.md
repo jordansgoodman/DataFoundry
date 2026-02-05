@@ -74,6 +74,7 @@ All UIs are routed through NGINX:
 - Superset: `http://<host>/superset/`
 - Airflow: `http://<host>/airflow/`
 - Grafana: `http://<host>/grafana/`
+- pgAdmin: `http://<host>/pgadmin/`
 
 Make sure `.env` sets:
 - `SUPERSET_BASE_URL=http://<host>/superset`
@@ -116,6 +117,7 @@ Services are all on the internal Docker network `df` and exposed only via NGINX.
 - `loki`: log store
 - `promtail`: log shipper
 - `grafana`: logs and metrics UI
+- `pgadmin`: PostgreSQL admin UI
 - `prometheus`: metrics store
 - `node-exporter`: host metrics
 - `statsd-exporter`: Airflow metrics bridge

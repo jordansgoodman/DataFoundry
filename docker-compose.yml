@@ -199,7 +199,7 @@ services:
   nginx:
     image: nginx:1.25
     restart: unless-stopped
-    depends_on: [superset-web, airflow-webserver]
+    depends_on: [superset-web, airflow-webserver, grafana, pgadmin]
     labels:
       logging: promtail
       app: nginx
@@ -329,6 +329,21 @@ services:
       - "--storage.path=/alertmanager"
     networks: [df]
 
+  pgadmin:
+    image: dpage/pgadmin4:8.12
+    restart: unless-stopped
+    depends_on: [postgres]
+    labels:
+      logging: promtail
+      app: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_LISTEN_PORT: 5050
+    volumes:
+      - ./data/pgadmin:/var/lib/pgadmin
+      - ./scripts/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    networks: [df]
   statsd-exporter:
     image: prom/statsd-exporter:v0.26.1
     restart: unless-stopped
