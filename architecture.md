@@ -69,3 +69,27 @@
   Node Exporter -> Prometheus -> Grafana
   Airflow StatsD -> StatsD Exporter -> Prometheus -> Grafana
 ```
+
+## Mermaid Diagram
+```mermaid
+flowchart TD
+  U["Users"] --> N["NGINX"]
+  N --> S["Superset (Web + Worker)"]
+  N --> A["Airflow (Web/Scheduler/Worker)"]
+  N --> G["Grafana"]
+
+  A -->|triggers| D["dlt"]
+  D --> P["Postgres"]
+  S --> P
+  R["Redis"] --> S
+  R --> A
+
+  subgraph Logs
+    L1["Docker logs"] --> PR["Promtail"] --> LK["Loki"] --> G
+  end
+
+  subgraph Metrics
+    NE["Node Exporter"] --> PM["Prometheus"] --> G
+    SD["Airflow StatsD"] --> SE["StatsD Exporter"] --> PM
+  end
+```
