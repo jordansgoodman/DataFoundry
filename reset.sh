@@ -30,4 +30,13 @@ if [[ "$KEEP_ENV" == "false" ]]; then
   rm -f .env data/credentials.txt
 fi
 
+mkdir -p data
+if [[ "$(id -u)" -eq 0 ]]; then
+  chmod -R a+rwX data || true
+elif command -v sudo >/dev/null 2>&1; then
+  sudo chmod -R a+rwX data || true
+else
+  chmod -R a+rwX data || true
+fi
+
 ./bootstrap.sh
