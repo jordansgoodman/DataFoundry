@@ -42,7 +42,11 @@ services:
   superset-web:
     image: apache/superset:2.1.0
     restart: unless-stopped
-    depends_on: [postgres, redis]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     labels:
       logging: promtail
       app: superset-web
@@ -71,7 +75,11 @@ services:
   superset-worker:
     image: apache/superset:2.1.0
     restart: unless-stopped
-    depends_on: [superset-web, redis]
+    depends_on:
+      superset-web:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     labels:
       logging: promtail
       app: superset-worker
@@ -98,7 +106,11 @@ services:
       context: ./docker/airflow
       dockerfile: Dockerfile
     restart: unless-stopped
-    depends_on: [postgres, redis]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     labels:
       logging: promtail
@@ -135,7 +147,9 @@ services:
       context: ./docker/airflow
       dockerfile: Dockerfile
     restart: unless-stopped
-    depends_on: [airflow-webserver]
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     labels:
       logging: promtail
@@ -163,7 +177,9 @@ services:
       context: ./docker/airflow
       dockerfile: Dockerfile
     restart: unless-stopped
-    depends_on: [airflow-webserver]
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     labels:
       logging: promtail
@@ -341,7 +357,9 @@ services:
   pgadmin:
     image: dpage/pgadmin4:8.12
     restart: unless-stopped
-    depends_on: [postgres]
+    depends_on:
+      postgres:
+        condition: service_healthy
     labels:
       logging: promtail
       app: pgadmin
