@@ -42,6 +42,7 @@ values.setdefault("DF_HOSTNAME", DEFAULT_HOST)
 values["SUPERSET_BASE_URL"] = f"http://{DEFAULT_HOST}/superset"
 values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}/airflow"
 values["PGADMIN_EMAIL"] = "admin@datafoundry.local"
+values["AIRFLOW_UID"] = str(os.getuid())
 
 # Read example and write .env
 lines = []

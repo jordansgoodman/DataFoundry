@@ -6,6 +6,12 @@ if [[ ! -f .env ]]; then
   python3 scripts/setup/generate_env.py
 fi
 
+if ! grep -q "^AIRFLOW_UID=" .env; then
+  echo "AIRFLOW_UID=$(id -u)" >> .env
+fi
+
+mkdir -p data/airflow
+
 ./scripts/pgadmin/bootstrap_pgadmin.sh
 
 if ! command -v docker >/dev/null 2>&1; then

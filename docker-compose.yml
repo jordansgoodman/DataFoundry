@@ -97,6 +97,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on: [postgres, redis]
+    user: "${AIRFLOW_UID:-50000}:0"
     labels:
       logging: promtail
       app: airflow-webserver
@@ -132,6 +133,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on: [airflow-webserver]
+    user: "${AIRFLOW_UID:-50000}:0"
     labels:
       logging: promtail
       app: airflow-scheduler
@@ -158,6 +160,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on: [airflow-webserver]
+    user: "${AIRFLOW_UID:-50000}:0"
     labels:
       logging: promtail
       app: airflow-worker
