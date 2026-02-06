@@ -7,6 +7,14 @@ LOCK_FILE="/tmp/superset-init.lock"
 exec 9>"$LOCK_FILE"
 flock -x 9
 
+echo "Waiting for Postgres..."
+for i in {1..60}; do
+  if pg_isready -h postgres -p 5432 >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+
 superset db upgrade
 superset fab create-admin \
   --username "${SUPERSET_ADMIN_USERNAME}" \
