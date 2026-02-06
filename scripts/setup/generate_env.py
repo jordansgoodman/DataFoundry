@@ -39,8 +39,8 @@ values["AIRFLOW__CORE__FERNET_KEY"] = base64.urlsafe_b64encode(secrets.token_byt
 
 # Defaults
 values.setdefault("DF_HOSTNAME", DEFAULT_HOST)
-values["SUPERSET_BASE_URL"] = f"http://{DEFAULT_HOST}/superset"
-values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}/airflow"
+values["SUPERSET_BASE_URL"] = f"http://{DEFAULT_HOST}:8080/superset"
+values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}:8080/airflow"
 values["PGADMIN_EMAIL"] = "admin@example.com"
 values["AIRFLOW_UID"] = str(os.getuid())
 values.setdefault("SUPERSET_DB", "superset")
