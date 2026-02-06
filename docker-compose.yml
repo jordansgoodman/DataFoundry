@@ -83,7 +83,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    command: ["/app/docker/docker-init.sh", "worker"]
+    command: ["bash", "-c", "celery --app=superset.tasks.celery_app:app worker -O fair -l INFO"]
     volumes:
       - ./data/superset:/app/superset_home
       - ./scripts/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
