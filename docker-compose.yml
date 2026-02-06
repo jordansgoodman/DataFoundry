@@ -65,6 +65,26 @@ services:
       timeout: 5s
       retries: 10
 
+  bi-worker:
+    build:
+      context: ./docker/bi
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      logging: promtail
+      app: bi-worker
+    env_file: .env
+    environment:
+      BI_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      BI_SCHEDULER_POLL_SECONDS: ${BI_SCHEDULER_POLL_SECONDS:-30}
+    volumes:
+      - ./bi:/app
+    command: ["python", "/app/worker.py"]
+    networks: [df]
+
   airflow-webserver:
     build:
       context: ./docker/airflow

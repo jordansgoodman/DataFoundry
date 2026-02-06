@@ -85,7 +85,12 @@ The BI app is powered by Streamlit and provides:
 - SQL Lab (run queries)
 - Saved queries
 - Dashboards
-Additional parity features (RBAC, scheduled refreshes, audit logs) are tracked in `TODO.md`.
+- RBAC (Admin/Analyst/Viewer)
+- Scheduled refreshes (via `bi-worker`)
+- Audit logs
+- Multi‑tenant workspaces
+- Multi‑datasource metadata layer
+- Chart library and dashboard builder (layouts + filters)
 
 Make sure `.env` sets:
 - `BI_BASE_URL=http://<host>:8080/bi`
@@ -115,6 +120,7 @@ Services are all on the internal Docker network `df` and exposed only via NGINX.
 - `postgres`: analytics warehouse
 - `redis`: cache and task queue
 - `bi`: DataFoundry BI (Streamlit)
+- `bi-worker`: scheduled query runner for BI refreshes
 - `airflow-webserver`: Airflow UI
 - `airflow-scheduler`: Airflow scheduler
 - `airflow-worker`: Airflow Celery worker
@@ -217,7 +223,7 @@ Key variables:
 - `DF_HOSTNAME`
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `AIRFLOW_DB`
-- `BI_ADMIN_USERNAME`, `BI_ADMIN_PASSWORD`, `BI_BASE_URL`
+- `BI_ADMIN_USERNAME`, `BI_ADMIN_PASSWORD`, `BI_BASE_URL`, `BI_SCHEDULER_POLL_SECONDS`
 - `AIRFLOW_ADMIN_USERNAME`, `AIRFLOW_ADMIN_PASSWORD`, `AIRFLOW_ADMIN_EMAIL`
 - `AIRFLOW__CORE__FERNET_KEY`, `AIRFLOW__WEBSERVER__BASE_URL`, `AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX`
 - `AIRFLOW_UID`

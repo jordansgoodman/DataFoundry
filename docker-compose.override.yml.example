@@ -6,6 +6,9 @@ services:
   bi:
     mem_limit: 2g
     cpus: 1.0
+  bi-worker:
+    mem_limit: 512m
+    cpus: 0.5
   airflow-webserver:
     mem_limit: 2g
     cpus: 1.0

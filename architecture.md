@@ -5,6 +5,7 @@
 - **PostgreSQL**: Primary analytics warehouse and metadata store.
 - **Redis**: Cache and async coordination (Airflow Celery broker).
 - **DataFoundry BI (Streamlit)**: BI UI and API.
+- **BI Worker**: Scheduled query runner for BI refreshes.
 - **Airflow Webserver**: Orchestration UI and API.
 - **Airflow Scheduler**: Schedules DAGs and task instances.
 - **Airflow Worker**: Executes tasks with Celery.
@@ -20,6 +21,7 @@
 - Users access **NGINX** which routes to BI, Airflow, and Grafana.
 - **Airflow** schedules ingestion using **dlt**, loading data into **Postgres**.
 - **DataFoundry BI** queries **Postgres** for dashboards and charts.
+- **BI Worker** executes scheduled queries and writes results to **Postgres**.
 - **Redis** backs Airflow Celery execution.
 - **Promtail** ships container logs into **Loki**.
 - **Grafana** reads logs from Loki and metrics from **Prometheus**.
@@ -51,6 +53,11 @@
      +-----+-----+                               +-----------------+
            ^
            |
+     +-----+-----+
+     | BI Worker |
+     +-----+-----+
+           ^
+           |
       +----+----+
       | Redis   |
       +----+----+
@@ -80,6 +87,8 @@ flowchart TD
   A -->|triggers| D["dlt"]
   D --> P["Postgres"]
   S --> P
+  BW["BI Worker"] --> P
+  BW --> P
   R["Redis"] --> A
   R --> A
 
