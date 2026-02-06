@@ -351,8 +351,6 @@ services:
     labels:
       logging: promtail
       app: statsd-exporter
-    ports:
-      - "9125:9125/udp"
     networks: [df]
 
 networks:
