@@ -19,6 +19,7 @@ Local-first, self-hosted analytics stack with one-command install.
 
 ## Platform Components
 - PostgreSQL: analytics warehouse and metadata store
+- Separate metadata databases for Superset and Airflow (default: `superset`, `airflow`)
 - Superset: BI and dashboards
 - Airflow: orchestration and scheduling
 - Redis: caching and async coordination
@@ -215,6 +216,7 @@ Only essential values are exposed and everything else uses opinionated defaults.
 Key variables:
 - `DF_HOSTNAME`
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- `SUPERSET_DB`, `AIRFLOW_DB`
 - `SUPERSET_ADMIN_USERNAME`, `SUPERSET_ADMIN_PASSWORD`, `SUPERSET_ADMIN_EMAIL`
 - `SUPERSET_SECRET_KEY`, `SUPERSET_BASE_URL`
 - `AIRFLOW_ADMIN_USERNAME`, `AIRFLOW_ADMIN_PASSWORD`, `AIRFLOW_ADMIN_EMAIL`
