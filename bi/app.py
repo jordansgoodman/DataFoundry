@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import streamlit.components.v1 as components
 from passlib.hash import bcrypt
 from sqlalchemy import create_engine, text
 
@@ -339,6 +340,89 @@ def set_cached_query_result(query_id: int, df: pd.DataFrame):
                 "data": data_json,
             },
         )
+
+
+def drag_reorder(items, key: str):
+    if not items:
+        return None
+
+    safe_items = [
+        {"id": str(item["id"]), "title": str(item["title"])} for item in items
+    ]
+    items_json = json.dumps(safe_items)
+
+    html = f"""
+    <div id="df-drag-root" style="font-family: sans-serif;">
+      <style>
+        .df-item {{
+          padding: 8px 10px;
+          margin: 6px 0;
+          background: #f4f6f8;
+          border: 1px solid #d9dee3;
+          border-radius: 6px;
+          cursor: grab;
+        }}
+        .df-item.dragging {{
+          opacity: 0.5;
+        }}
+      </style>
+      <div id="df-list"></div>
+    </div>
+    <script>
+      const items = {items_json};
+      const list = document.getElementById("df-list");
+      function render() {{
+        list.innerHTML = "";
+        items.forEach(item => {{
+          const div = document.createElement("div");
+          div.className = "df-item";
+          div.setAttribute("draggable", "true");
+          div.dataset.id = item.id;
+          div.textContent = item.title + " (#" + item.id + ")";
+          list.appendChild(div);
+        }});
+        attachHandlers();
+      }}
+      function attachHandlers() {{
+        let dragEl = null;
+        document.querySelectorAll(".df-item").forEach(el => {{
+          el.addEventListener("dragstart", (e) => {{
+            dragEl = el;
+            el.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+          }});
+          el.addEventListener("dragend", () => {{
+            el.classList.remove("dragging");
+          }});
+          el.addEventListener("dragover", (e) => {{
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          }});
+          el.addEventListener("drop", (e) => {{
+            e.preventDefault();
+            if (!dragEl || dragEl === el) return;
+            const nodes = Array.from(list.children);
+            const dragIndex = nodes.indexOf(dragEl);
+            const dropIndex = nodes.indexOf(el);
+            if (dragIndex < dropIndex) {{
+              list.insertBefore(dragEl, el.nextSibling);
+            }} else {{
+              list.insertBefore(dragEl, el);
+            }}
+            const order = Array.from(list.children).map(n => n.dataset.id);
+            const msg = {{
+              isStreamlitMessage: true,
+              type: "streamlit:setComponentValue",
+              value: order
+            }};
+            window.parent.postMessage(msg, "*");
+          }});
+        }});
+      }}
+      render();
+    </script>
+    """
+    return components.html(html, height=300, key=key)
 
 
 def login():
@@ -777,7 +861,24 @@ def dashboards():
                     st.success("Filter added")
                     st.rerun()
 
-                st.markdown("**Layout (drag via order + sizing)**")
+                st.markdown("**Drag & Drop Order**")
+                order_ids = drag_reorder(
+                    [{"id": item[0], "title": item[1]} for item in items],
+                    key=f"drag_{dash_id}",
+                )
+                if order_ids:
+                    with engine.begin() as conn:
+                        for idx, item_id in enumerate(order_ids):
+                            conn.execute(
+                                text(
+                                    "UPDATE bi_dashboard_items SET order_index=:o WHERE id=:id"
+                                ),
+                                {"o": idx, "id": int(item_id)},
+                            )
+                    st.success("Order updated")
+                    st.rerun()
+
+                st.markdown("**Layout (size + edit)**")
                 for item in items:
                     with st.container():
                         st.write(f"Item #{item[0]} — {item[1]}")

@@ -90,7 +90,7 @@ The BI app is powered by Streamlit and provides:
 - Audit logs
 - Multi‑tenant workspaces
 - Multi‑datasource metadata layer
-- Chart library and dashboard builder (layouts + filters)
+- Chart library and dashboard builder (drag‑drop order, layouts + filters)
 
 Make sure `.env` sets:
 - `BI_BASE_URL=http://<host>:8080/bi`
