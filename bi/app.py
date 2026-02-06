@@ -13,6 +13,7 @@ st.set_page_config(page_title="DataFoundry BI", layout="wide")
 DB_URL = os.environ.get("BI_DATABASE_URL")
 ADMIN_USER = os.environ.get("BI_ADMIN_USERNAME", "admin")
 ADMIN_PASS = os.environ.get("BI_ADMIN_PASSWORD", "admin")
+CACHE_TTL_SECONDS = int(os.environ.get("BI_DASHBOARD_CACHE_TTL_SECONDS", "60"))
 
 engine = create_engine(DB_URL, pool_pre_ping=True)
 
@@ -158,7 +159,6 @@ def init_metadata():
             """
         ))
 
-        # Ensure admin user exists
         admin_hash = bcrypt.hash(ADMIN_PASS)
         conn.execute(
             text(
@@ -171,7 +171,6 @@ def init_metadata():
             {"u": ADMIN_USER, "p": admin_hash},
         )
 
-        # Ensure default workspace and datasource
         conn.execute(
             text(
                 """
@@ -198,7 +197,6 @@ def init_metadata():
             {"wid": default_ws_id, "uri": DB_URL},
         )
 
-        # Ensure admin membership in default workspace
         conn.execute(
             text(
                 """
@@ -290,6 +288,57 @@ def run_query(sql: str, datasource_id: int):
     with ds_engine.connect() as conn:
         df = pd.read_sql(text(sql), conn)
     return df
+
+
+def get_cached_query_result(query_id: int):
+    with engine.connect() as conn:
+        row = conn.execute(
+            text(
+                """
+                SELECT run_at, data_json
+                FROM bi_query_results
+                WHERE query_id = :qid
+                ORDER BY run_at DESC
+                LIMIT 1
+                """
+            ),
+            {"qid": query_id},
+        ).fetchone()
+    if not row:
+        return None
+
+    run_at = row[0]
+    if not run_at:
+        return None
+
+    age = (datetime.utcnow() - run_at).total_seconds()
+    if age > CACHE_TTL_SECONDS:
+        return None
+
+    try:
+        data = json.loads(row[1]) if row[1] else []
+        return pd.DataFrame(data)
+    except Exception:
+        return None
+
+
+def set_cached_query_result(query_id: int, df: pd.DataFrame):
+    data_json = df.to_json(orient="records")
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                INSERT INTO bi_query_results (query_id, run_at, row_count, data_json)
+                VALUES (:qid, :run_at, :rows, :data)
+                """
+            ),
+            {
+                "qid": query_id,
+                "run_at": datetime.utcnow(),
+                "rows": len(df),
+                "data": data_json,
+            },
+        )
 
 
 def login():
@@ -518,6 +567,36 @@ def charts():
 
     for row in charts_rows:
         st.write(f"**{row[1]}** — {row[2]} — owner: {row[3]} — {row[4]}")
+        with st.expander(f"Edit {row[1]}"):
+            name = st.text_input("Name", value=row[1], key=f"cname_{row[0]}")
+            viz = st.selectbox(
+                "Viz", ["table", "line", "bar", "area", "scatter", "pie", "metric"],
+                index=["table", "line", "bar", "area", "scatter", "pie", "metric"].index(row[2]),
+                key=f"cviz_{row[0]}"
+            )
+            x_col = st.text_input("X column", key=f"cx_{row[0]}")
+            y_col = st.text_input("Y column", key=f"cy_{row[0]}")
+            if st.button("Save", key=f"csave_{row[0]}"):
+                with engine.begin() as conn:
+                    conn.execute(
+                        text(
+                            """
+                            UPDATE bi_charts
+                            SET name=:n, viz_type=:v, x_col=:x, y_col=:y
+                            WHERE id=:id
+                            """
+                        ),
+                        {"n": name, "v": viz, "x": x_col or None, "y": y_col or None, "id": row[0]},
+                    )
+                audit(st.session_state["username"], "edit_chart", name, workspace_id)
+                st.success("Updated")
+                st.rerun()
+            if st.button("Delete", key=f"cdel_{row[0]}"):
+                with engine.begin() as conn:
+                    conn.execute(text("DELETE FROM bi_charts WHERE id=:id"), {"id": row[0]})
+                audit(st.session_state["username"], "delete_chart", row[1], workspace_id)
+                st.success("Deleted")
+                st.rerun()
 
 
 def apply_filters(df: pd.DataFrame, filters):
@@ -698,6 +777,35 @@ def dashboards():
                     st.success("Filter added")
                     st.rerun()
 
+                st.markdown("**Layout (drag via order + sizing)**")
+                for item in items:
+                    with st.container():
+                        st.write(f"Item #{item[0]} — {item[1]}")
+                        new_title = st.text_input("Title", value=item[1], key=f"it_title_{item[0]}")
+                        new_order = st.number_input("Order", min_value=0, max_value=1000, value=item[2], key=f"it_order_{item[0]}")
+                        new_width = st.number_input("Width (1-12)", min_value=1, max_value=12, value=item[3], key=f"it_width_{item[0]}")
+                        new_height = st.number_input("Height (rows)", min_value=1, max_value=12, value=item[4], key=f"it_height_{item[0]}")
+                        cols = st.columns(2)
+                        if cols[0].button("Update", key=f"it_up_{item[0]}"):
+                            with engine.begin() as conn:
+                                conn.execute(
+                                    text(
+                                        """
+                                        UPDATE bi_dashboard_items
+                                        SET title=:t, order_index=:o, width=:w, height=:h
+                                        WHERE id=:id
+                                        """
+                                    ),
+                                    {"t": new_title, "o": new_order, "w": new_width, "h": new_height, "id": item[0]},
+                                )
+                            st.success("Updated")
+                            st.rerun()
+                        if cols[1].button("Remove", key=f"it_rm_{item[0]}"):
+                            with engine.begin() as conn:
+                                conn.execute(text("DELETE FROM bi_dashboard_items WHERE id=:id"), {"id": item[0]})
+                            st.success("Removed")
+                            st.rerun()
+
         if not items:
             st.info("No items yet")
             continue
@@ -723,11 +831,16 @@ def dashboards():
                 viz_type = item[5] or "table"
                 x_col = item[6]
                 y_col = item[7]
+                query_id = item[8]
                 sql = item[9]
                 datasource_id = item[10]
                 with cols[idx]:
                     st.markdown(f"### {title}")
-                    df = run_query(sql, datasource_id) if sql else None
+                    df = get_cached_query_result(query_id) if query_id else None
+                    if df is None and sql:
+                        df = run_query(sql, datasource_id)
+                        if query_id:
+                            set_cached_query_result(query_id, df)
                     df = apply_filters(df, filters)
                     render_chart(df, viz_type, x_col, y_col)
 
