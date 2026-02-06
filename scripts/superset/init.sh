@@ -2,8 +2,7 @@
 set -euo pipefail
 
 # Ensure only one initializer runs at a time
-LOCK_FILE="/app/superset_home/.init.lock"
-mkdir -p /app/superset_home
+LOCK_FILE="/tmp/superset-init.lock"
 
 exec 9>"$LOCK_FILE"
 flock -x 9
