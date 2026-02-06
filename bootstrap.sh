@@ -9,6 +9,12 @@ fi
 if ! grep -q "^AIRFLOW_UID=" .env; then
   echo "AIRFLOW_UID=$(id -u)" >> .env
 fi
+if ! grep -q "^AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=" .env; then
+  echo "AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=/airflow" >> .env
+fi
+if ! grep -q "^AIRFLOW__WEBSERVER__BASE_URL=" .env; then
+  echo "AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080/airflow" >> .env
+fi
 
 ensure_permissions() {
   mkdir -p data

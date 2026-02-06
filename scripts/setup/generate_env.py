@@ -43,6 +43,7 @@ values["SUPERSET_BASE_URL"] = f"http://{DEFAULT_HOST}:8080/superset"
 values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}:8080/airflow"
 values["PGADMIN_EMAIL"] = "admin@example.com"
 values["AIRFLOW_UID"] = str(os.getuid())
+values["AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX"] = "/airflow"
 values.setdefault("SUPERSET_DB", "superset")
 values.setdefault("AIRFLOW_DB", "airflow")
 
