@@ -10,11 +10,31 @@ if ! grep -q "^AIRFLOW_UID=" .env; then
   echo "AIRFLOW_UID=$(id -u)" >> .env
 fi
 
-echo "Fixing data directory permissions..."
-mkdir -p data
-chmod -R a+rwX data || true
+ensure_permissions() {
+  mkdir -p data
+  if [[ "$(id -u)" -eq 0 ]]; then
+    chmod -R a+rwX data || true
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo chmod -R a+rwX data || true
+  else
+    chmod -R a+rwX data || true
+  fi
+}
 
-mkdir -p data/airflow
+mkdir -p \
+  data/airflow \
+  data/postgres \
+  data/redis \
+  data/superset \
+  data/logging/loki \
+  data/logging/promtail \
+  data/logging/grafana \
+  data/metrics/prometheus \
+  data/metrics/alertmanager \
+  data/pgadmin
+
+echo "Fixing data directory permissions..."
+ensure_permissions
 
 ./scripts/pgadmin/bootstrap_pgadmin.sh
 
