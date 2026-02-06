@@ -12,7 +12,7 @@ DEFAULT_HOST = os.environ.get("DF_HOSTNAME", "localhost")
 
 KEYS_TO_GEN = {
     "POSTGRES_PASSWORD": 24,
-    "SUPERSET_ADMIN_PASSWORD": 24,
+    "BI_ADMIN_PASSWORD": 24,
     "AIRFLOW_ADMIN_PASSWORD": 24,
     "REDIS_PASSWORD": 24,
     "GRAFANA_ADMIN_PASSWORD": 24,
@@ -31,20 +31,17 @@ values = {}
 for key, length in KEYS_TO_GEN.items():
     values[key] = secrets.token_urlsafe(length)[:length]
 
-# Superset secret key
-values["SUPERSET_SECRET_KEY"] = secrets.token_hex(32)
-
 # Airflow fernet key (32 urlsafe base64)
 values["AIRFLOW__CORE__FERNET_KEY"] = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("utf-8")
 
 # Defaults
 values.setdefault("DF_HOSTNAME", DEFAULT_HOST)
-values["SUPERSET_BASE_URL"] = f"http://{DEFAULT_HOST}:8080/superset"
+values["BI_ADMIN_USERNAME"] = "admin"
+values["BI_BASE_URL"] = f"http://{DEFAULT_HOST}:8080/bi"
 values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}:8080/airflow"
 values["PGADMIN_EMAIL"] = "admin@example.com"
 values["AIRFLOW_UID"] = str(os.getuid())
 values["AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX"] = "/airflow"
-values.setdefault("SUPERSET_DB", "superset")
 values.setdefault("AIRFLOW_DB", "airflow")
 
 # Read example and write .env
@@ -71,8 +68,8 @@ creds = [
     f"Postgres user: datafoundry",
     f"Postgres password: {values['POSTGRES_PASSWORD']}",
     "",
-    f"Superset admin: admin",
-    f"Superset password: {values['SUPERSET_ADMIN_PASSWORD']}",
+    f"BI admin: {values['BI_ADMIN_USERNAME']}",
+    f"BI password: {values['BI_ADMIN_PASSWORD']}",
     "",
     f"Airflow admin: airflow",
     f"Airflow password: {values['AIRFLOW_ADMIN_PASSWORD']}",

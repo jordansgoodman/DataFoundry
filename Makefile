@@ -1,4 +1,4 @@
-.PHONY: up down logs restart init
+.PHONY: up down logs restart
 
 up:
 	./bootstrap.sh
@@ -11,6 +11,3 @@ restart:
 
 logs:
 	docker compose logs -f --tail=200
-
-init:
-	docker compose run --rm superset-web /app/scripts/init.sh

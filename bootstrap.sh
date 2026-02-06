@@ -31,7 +31,6 @@ mkdir -p \
   data/airflow \
   data/postgres \
   data/redis \
-  data/superset \
   data/logging/loki \
   data/logging/promtail \
   data/logging/grafana \
@@ -55,13 +54,6 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 docker compose -f docker-compose.yml up -d
-
-# First-run Superset init
-if [[ ! -f data/.superset_initialized ]]; then
-  echo "Initializing Superset..."
-  docker compose -f docker-compose.yml run --rm superset-web /app/scripts/init.sh
-  touch data/.superset_initialized
-fi
 
 # First-run Airflow ingest
 if [[ ! -f data/.airflow_initialized ]]; then

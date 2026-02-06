@@ -6,7 +6,7 @@
 
 ## Suggested Approach
 - Use a lightweight HTTP load tester (k6, vegeta, or Locust)
-- Focus on Superset dashboard endpoints and Airflow UI pages
+- Focus on DataFoundry BI dashboard endpoints and Airflow UI pages
 
 ## Minimal Plan
 1. Pick 2–3 dashboards and a SQL Lab query.
@@ -20,4 +20,4 @@
 
 ## Notes
 - Increase Postgres resources if dashboards are slow.
-- Reduce Superset concurrency if memory pressure occurs.
+- Reduce DataFoundry BI concurrency if memory pressure occurs.

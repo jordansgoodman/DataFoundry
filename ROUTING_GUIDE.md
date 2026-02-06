@@ -25,7 +25,7 @@ NGINX is the only service that exposes a host port. All other containers are int
 
 ### 2.1 URL map
 NGINX routes on URL path prefixes:
-- `/superset/` → Superset UI + API
+- `/bi/` → DataFoundry BI UI + API
 - `/airflow/` → Airflow UI + API
 - `/grafana/` → Grafana UI
 - `/` → minimal status response
@@ -34,7 +34,7 @@ NGINX routes on URL path prefixes:
 NGINX matches location blocks by prefix:
 
 ```
-location /superset/ { proxy_pass http://superset-web:8088/; }
+location /bi/ { proxy_pass http://bi:8501/; }
 location /airflow/  { proxy_pass http://airflow-webserver:8080/; }
 location /grafana/  { proxy_pass http://grafana:3000/; }
 location /          { return 200 "DataFoundry is running."; }
@@ -47,7 +47,7 @@ Each upstream receives proxy headers so it can reconstruct the original client r
 - `Host`: original host (e.g., `analytics.mycompany.com`)
 - `X-Real-IP`: client IP
 - `X-Forwarded-For`: client IP chain
-- `X-Forwarded-Prefix`: `/superset`, `/airflow`, or `/grafana`
+- `X-Forwarded-Prefix`: `/bi`, `/airflow`, or `/grafana`
 
 These headers allow the app to:
 - Render correct URLs
@@ -58,16 +58,15 @@ These headers allow the app to:
 
 ## 3) Application Awareness of Reverse Proxy
 
-### 3.1 Superset
-Superset must generate links under `/superset/` rather than `/`.
+### 3.1 DataFoundry BI (Streamlit)
+DataFoundry BI must render under `/bi/`.
 This is controlled by:
-- `SUPERSET_BASE_URL=http://<host>/superset`
-- `WEBSERVER_BASEURL` in `superset_config.py`
-- `ENABLE_PROXY_FIX=True`
+- `--server.baseUrlPath=bi` in the Streamlit command
+- `BI_BASE_URL=http://<host>:8080/bi` for link generation
 
 If this is missing:
 - Assets may 404
-- Redirects may send users to `/login` instead of `/superset/login`
+- Redirects and links may point to `/` instead of `/bi/`
 
 ### 3.2 Airflow
 Airflow’s UI generates links based on `AIRFLOW__WEBSERVER__BASE_URL`.
@@ -93,11 +92,11 @@ If misconfigured:
 
 ### 4.1 Docker network `df`
 All services are on the same internal Docker network `df`.
-No direct host ports are exposed except NGINX (80) and optionally Grafana if you choose.
+No direct host ports are exposed except NGINX (8080) and optionally Grafana if you choose.
 
 ### 4.2 Service discovery by name
 Inside the network, containers resolve each other by service name:
-- `superset-web`
+- `bi`
 - `airflow-webserver`
 - `grafana`
 - `postgres`
@@ -112,24 +111,24 @@ NGINX uses these names to proxy to upstreams.
 
 ---
 
-## 5) Request Lifecycle: Superset Example (Detailed)
+## 5) Request Lifecycle: DataFoundry BI Example (Detailed)
 
 ### 5.1 Browser initiates request
 User visits:
 ```
-https://analytics.mycompany.com/superset/
+https://analytics.mycompany.com/bi/
 ```
 
 ### 5.2 NGINX accepts TCP
 - TLS terminates at NGINX (if enabled)
-- NGINX selects `/superset/` location block
+- NGINX selects `/bi/` location block
 - NGINX sets proxy headers
 
 ### 5.3 NGINX forwards
-NGINX sends the request to `superset-web:8088` over the Docker network.
+NGINX sends the request to `bi:8501` over the Docker network.
 
-### 5.4 Superset processes
-Superset:
+### 5.4 DataFoundry BI processes
+DataFoundry BI:
 - Parses headers (`X-Forwarded-*`)
 - Checks auth session
 - Executes SQL against Postgres if needed
@@ -138,11 +137,11 @@ Superset:
 ### 5.5 Browser asset loading
 Browser requests:
 ```
-/superset/static/...
-/superset/api/v1/...
+/bi/static/...
+/bi/api/v1/...
 ```
 
-NGINX proxies each to Superset with the same headers.
+NGINX proxies each to DataFoundry BI with the same headers.
 
 ---
 
@@ -199,8 +198,8 @@ NGINX can enforce:
 This is recommended because it applies uniformly to all apps.
 
 ### 8.2 Application auth
-Each app has its own auth and RBAC:
-- Superset: admin/analyst/viewer
+Each app has its own auth model:
+- DataFoundry BI: admin login (RBAC roadmap)
 - Airflow: admin/user/viewer
 - Grafana: admin/editor/viewer
 
@@ -215,11 +214,10 @@ This is not HTTP routing, but it impacts what routes are exercised.
 ### 9.1 Airflow → dlt
 Airflow triggers the dlt pipeline, which loads data into Postgres.
 
-### 9.2 Superset → Postgres
-Superset queries Postgres for dashboards and charts.
+### 9.2 DataFoundry BI → Postgres
+DataFoundry BI queries Postgres for dashboards and charts.
 
 ### 9.3 Redis usage
-- Superset caches query results
 - Airflow uses Redis as Celery broker
 
 ---
@@ -248,7 +246,7 @@ If routing fails, NGINX logs will show upstream errors.
 - Confirm NGINX sets `X-Forwarded-Prefix`
 
 ### 11.2 Redirect loops
-**Likely cause**: app thinks it is hosted at `/` instead of `/superset/` or `/airflow/`.
+**Likely cause**: app thinks it is hosted at `/` instead of `/bi/` or `/airflow/`.
 
 ### 11.3 502 Bad Gateway
 **Likely cause**: upstream container down or wrong service name/port.
@@ -277,7 +275,7 @@ All base URLs must be updated to `https://<host>/...`.
 1. Check NGINX is up:
    - `curl http://<host>/`
 2. Check NGINX routes:
-   - `curl -I http://<host>/superset/`
+   - `curl -I http://<host>/bi/`
    - `curl -I http://<host>/airflow/`
    - `curl -I http://<host>/grafana/`
 3. Confirm base URLs in `.env`

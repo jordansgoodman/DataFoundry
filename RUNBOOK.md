@@ -9,7 +9,7 @@
 
 ## Common Alerts
 ### High CPU / Memory
-- Verify no runaway queries in Superset.
+- Verify no runaway queries in DataFoundry BI.
 - Check Airflow task backlog.
 - Consider scaling resources or reducing concurrency.
 

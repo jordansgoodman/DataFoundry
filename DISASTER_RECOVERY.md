@@ -15,7 +15,7 @@
    - `./scripts/healthcheck/smoke_test.sh`
 
 ## Verification
-- Superset UI loads
+- DataFoundry BI UI loads
 - Airflow UI loads
 - Grafana UI loads
 - Data present in Postgres

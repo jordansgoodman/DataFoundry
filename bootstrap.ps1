@@ -39,12 +39,6 @@ Write-Host "Ensure Docker Desktop is installed and running (WSL2 backend recomme
 & docker compose -f docker-compose.yml up -d
 
 # First-run Superset init
-if (!(Test-Path "data/.superset_initialized")) {
-  Write-Host "Initializing Superset..."
-  & docker compose -f docker-compose.yml run --rm superset-web /app/scripts/init.sh
-  New-Item -ItemType File -Path "data/.superset_initialized" | Out-Null
-}
-
 if (!(Test-Path "data/.airflow_initialized")) {
   Write-Host "Waiting for Airflow..."
   $ready = $false

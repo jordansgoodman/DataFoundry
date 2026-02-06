@@ -4,7 +4,7 @@
 - Change all default credentials in `.env`.
 - Set strong `SUPERSET_SECRET_KEY` and `AIRFLOW__CORE__FERNET_KEY`.
 - Enable TLS on NGINX and provide valid certificates.
-- Restrict access to `/airflow/`, `/grafana/`, and `/superset/` (IP allowlist or SSO).
+- Restrict access to `/airflow/`, `/grafana/`, and `/bi/` (IP allowlist or SSO).
 
 ## TLS Setup (Recommended)
 1. Create or obtain TLS certs:

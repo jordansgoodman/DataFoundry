@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SUP_DB="${SUPERSET_DB:-superset}"
 AF_DB="${AIRFLOW_DB:-airflow}"
 
 create_db() {
@@ -14,7 +13,6 @@ create_db() {
   fi
 }
 
-create_db "$SUP_DB"
 create_db "$AF_DB"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$POSTGRES_DB" <<SQL

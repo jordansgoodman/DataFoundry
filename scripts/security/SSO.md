@@ -1,11 +1,9 @@
 # SSO / OIDC Integration (Guidance)
 
-## Superset (OIDC)
-Superset supports OIDC via its security manager and config overrides.
-Recommended approach:
-- Configure an OIDC provider (Okta, Auth0, Azure AD)
-- Set OIDC client ID/secret
-- Enable `AUTH_OID` and configure provider settings in `superset_config.py`
+## DataFoundry BI (Streamlit)
+Streamlit does not ship with built-in OIDC. Recommended approach:
+- Place an SSO gateway in front of NGINX (OIDC/OAuth proxy)
+- Or integrate OIDC in the BI app if you want native auth
 
 ## Grafana (OAuth)
 Grafana supports OAuth for most identity providers.

@@ -16,7 +16,7 @@
    - `docker compose up -d`
 3. Verify health:
    - `docker compose ps`
-   - Check `/superset/`, `/airflow/`, `/grafana/`
+   - Check `/bi/`, `/airflow/`, `/grafana/`
 
 ## Rollback
 - Revert image tags in `docker-compose.yml` and re-run `docker compose up -d`.

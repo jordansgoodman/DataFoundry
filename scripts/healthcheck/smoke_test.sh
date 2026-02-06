@@ -16,7 +16,7 @@ check() {
 }
 
 check "NGINX" "${BASE}/"
-check "Superset" "${BASE}/superset/"
+check "BI" "${BASE}/bi/"
 check "Airflow" "${BASE}/airflow/"
 check "Grafana" "${BASE}/grafana/"
 

@@ -3,10 +3,7 @@ services:
   postgres:
     mem_limit: 4g
     cpus: 2.0
-  superset-web:
-    mem_limit: 2g
-    cpus: 1.0
-  superset-worker:
+  bi:
     mem_limit: 2g
     cpus: 1.0
   airflow-webserver:

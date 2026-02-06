@@ -1,9 +1,8 @@
 # Governance And Access
 
-## Superset
-- Default roles: Admin, Analyst, Viewer
-- Use dataset-level permissions for `analytics` schema
-- Keep SQL Lab access limited to analysts
+## DataFoundry BI
+- Current: Admin-only login (RBAC roadmap)
+- Plan: Admin/Analyst/Viewer roles and dataset-level permissions
 
 ## Airflow
 - Use built-in RBAC (Admin, User, Viewer)

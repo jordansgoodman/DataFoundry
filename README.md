@@ -19,8 +19,8 @@ Local-first, self-hosted analytics stack with one-command install.
 
 ## Platform Components
 - PostgreSQL: analytics warehouse and metadata store
-- Separate metadata databases for Superset and Airflow (default: `superset`, `airflow`)
-- Superset: BI and dashboards
+- Separate metadata database for Airflow (default: `airflow`)
+- DataFoundry BI (Streamlit): BI and dashboards
 - Airflow: orchestration and scheduling
 - Redis: caching and async coordination
 - NGINX: reverse proxy and single-URL routing
@@ -38,8 +38,7 @@ Local-first, self-hosted analytics stack with one-command install.
 The bootstrap script brings up services and runs first-run initialization (Docker and Python 3 must already be installed).
 
 ## Data Ingestion (dlt + Airflow)
-The Airflow DAG `nyc_taxi_full_refresh` uses dlt to load NYC Taxi data into Postgres
-and then auto-registers the dataset in Superset.
+The Airflow DAG `nyc_taxi_full_refresh` uses dlt to load NYC Taxi data into Postgres.
 
 Trigger it after the stack is up:
 - `docker compose exec airflow-webserver airflow dags trigger nyc_taxi_full_refresh`
@@ -72,17 +71,24 @@ To enable Slack:
 ## Single URL Access
 All UIs are routed through NGINX:
 
-- Superset: `http://<host>/superset/`
-- Airflow: `http://<host>/airflow/`
-- Grafana: `http://<host>/grafana/`
-- pgAdmin: `http://<host>/pgadmin/`
+- BI: `http://<host>:8080/bi/`
+- Airflow: `http://<host>:8080/airflow/`
+- Grafana: `http://<host>:8080/grafana/`
+- pgAdmin: `http://<host>:8080/pgadmin/`
 
 ## DB Tools
 pgAdmin is pre-configured with the Postgres server and password on first boot.
 Credentials are available in `data/credentials.txt`.
 
+## DataFoundry BI
+The BI app is powered by Streamlit and provides:
+- SQL Lab (run queries)
+- Saved queries
+- Dashboards
+Additional parity features (RBAC, scheduled refreshes, audit logs) are tracked in `TODO.md`.
+
 Make sure `.env` sets:
-- `SUPERSET_BASE_URL=http://<host>:8080/superset`
+- `BI_BASE_URL=http://<host>:8080/bi`
 - `AIRFLOW__WEBSERVER__BASE_URL=http://<host>:8080/airflow`
 
 ## Detailed Setup Flow
@@ -92,8 +98,7 @@ This is what happens when you run the bootstrap:
 2. Verifies Docker is installed and running
 3. Creates persistent data directories under `./data`
 4. Starts the Docker Compose stack
-5. Runs Superset first-run initialization
-6. Leaves the stack running behind NGINX
+5. Leaves the stack running behind NGINX
 
 On macOS/Windows, the bootstrap assumes Docker Desktop is already running.
 
@@ -101,10 +106,6 @@ On macOS/Windows, the bootstrap assumes Docker Desktop is already running.
 On first install, the system:
 - Creates Postgres volumes
 - Initializes Postgres schemas and roles
-- Initializes Superset and creates the admin user
-- Registers the Postgres connection in Superset
-- Registers the NYC Taxi dataset in Superset
-- Creates a starter Superset dashboard
 - Triggers the NYC Taxi ingestion DAG once
 
 ## Service Map
@@ -113,8 +114,7 @@ Services are all on the internal Docker network `df` and exposed only via NGINX.
 - `nginx`: edge routing and reverse proxy
 - `postgres`: analytics warehouse
 - `redis`: cache and task queue
-- `superset-web`: Superset web UI
-- `superset-worker`: Superset async worker
+- `bi`: DataFoundry BI (Streamlit)
 - `airflow-webserver`: Airflow UI
 - `airflow-scheduler`: Airflow scheduler
 - `airflow-worker`: Airflow Celery worker
@@ -143,8 +143,8 @@ Once you are inside the Ubuntu VM:
 6. Trigger the NYC Taxi load:
    - `docker compose exec airflow-webserver airflow dags trigger nyc_taxi_full_refresh`
 7. Open services:
-   - Superset: `http://<vm-ip>/superset/`
-   - Airflow: `http://<vm-ip>/airflow/`
+   - BI: `http://<vm-ip>:8080/bi/`
+   - Airflow: `http://<vm-ip>:8080/airflow/`
 
 ## Defaults
 On first run, `.env` is generated automatically with strong random defaults.
@@ -216,9 +216,8 @@ Only essential values are exposed and everything else uses opinionated defaults.
 Key variables:
 - `DF_HOSTNAME`
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
-- `SUPERSET_DB`, `AIRFLOW_DB`
-- `SUPERSET_ADMIN_USERNAME`, `SUPERSET_ADMIN_PASSWORD`, `SUPERSET_ADMIN_EMAIL`
-- `SUPERSET_SECRET_KEY`, `SUPERSET_BASE_URL`
+- `AIRFLOW_DB`
+- `BI_ADMIN_USERNAME`, `BI_ADMIN_PASSWORD`, `BI_BASE_URL`
 - `AIRFLOW_ADMIN_USERNAME`, `AIRFLOW_ADMIN_PASSWORD`, `AIRFLOW_ADMIN_EMAIL`
 - `AIRFLOW__CORE__FERNET_KEY`, `AIRFLOW__WEBSERVER__BASE_URL`, `AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX`
 - `AIRFLOW_UID`

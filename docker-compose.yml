@@ -11,7 +11,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      SUPERSET_DB: ${SUPERSET_DB}
       AIRFLOW_DB: ${AIRFLOW_DB}
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
@@ -39,67 +38,32 @@ services:
       timeout: 5s
       retries: 10
 
-  superset-web:
-    image: apache/superset:2.1.0
+  bi:
+    build:
+      context: ./docker/bi
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     labels:
       logging: promtail
-      app: superset-web
+      app: bi
     env_file: .env
     environment:
-      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SUPERSET_ENV: production
-      SUPERSET_LOAD_EXAMPLES: "no"
-      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${SUPERSET_DB}
+      BI_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      BI_ADMIN_USERNAME: ${BI_ADMIN_USERNAME}
+      BI_ADMIN_PASSWORD: ${BI_ADMIN_PASSWORD}
+      BI_BASE_URL: ${BI_BASE_URL}
     volumes:
-      - ./data/superset:/app/superset_home
-      - ./scripts/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
-      - ./scripts/superset:/app/scripts:ro
-      - ./scripts/superset:/app/scripts:ro
+      - ./bi:/app
+    command: ["streamlit", "run", "/app/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.baseUrlPath=bi"]
     networks: [df]
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8088/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8501/_stcore/health || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 10
-
-  superset-worker:
-    image: apache/superset:2.1.0
-    restart: unless-stopped
-    depends_on:
-      superset-web:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    labels:
-      logging: promtail
-      app: superset-worker
-    env_file: .env
-    environment:
-      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
-      SUPERSET_ENV: production
-      SUPERSET_LOAD_EXAMPLES: "no"
-      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${SUPERSET_DB}
-    command: ["bash", "-c", "celery --app=superset.tasks.celery_app:app worker -O fair -l INFO"]
-    volumes:
-      - ./data/superset:/app/superset_home
-      - ./scripts/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
-      - ./scripts/superset:/app/scripts:ro
-      - ./scripts/superset:/app/scripts:ro
-    networks: [df]
 
   airflow-webserver:
     build:
@@ -223,7 +187,7 @@ services:
   nginx:
     image: nginx:1.25
     restart: unless-stopped
-    depends_on: [superset-web, airflow-webserver, grafana, pgadmin]
+    depends_on: [bi, airflow-webserver, grafana, pgadmin]
     labels:
       logging: promtail
       app: nginx

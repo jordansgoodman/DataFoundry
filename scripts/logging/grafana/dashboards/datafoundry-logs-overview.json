@@ -10,11 +10,11 @@
   "panels": [
     {
       "type": "logs",
-      "title": "Superset Logs",
+      "title": "BI Logs",
       "datasource": {"type": "loki", "uid": "-1"},
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
       "options": {"showLabels": true, "showTime": true, "sortOrder": "Descending"},
-      "targets": [{"expr": "{app=~\\\"superset-.*\\\"}", "refId": "A"}]
+      "targets": [{"expr": "{app=~\\\"bi\\\"}", "refId": "A"}]
     },
     {
       "type": "logs",
