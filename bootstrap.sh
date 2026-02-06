@@ -10,6 +10,9 @@ if ! grep -q "^AIRFLOW_UID=" .env; then
   echo "AIRFLOW_UID=$(id -u)" >> .env
 fi
 
+echo "Fixing data directory ownership..."
+sudo chown -R "$(id -u):$(id -g)" data || true
+
 mkdir -p data/airflow
 
 ./scripts/pgadmin/bootstrap_pgadmin.sh
