@@ -103,7 +103,7 @@ services:
     command: ["bash", "-c", "airflow db init && airflow users create --username ${AIRFLOW_ADMIN_USERNAME} --password ${AIRFLOW_ADMIN_PASSWORD} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL} || true && airflow webserver"]
     networks: [df]
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/airflow/health || exit 1"]
+      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  urllib.request.urlopen('http://localhost:8080/airflow/health', timeout=5)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
       interval: 20s
       timeout: 5s
       retries: 10
@@ -196,7 +196,6 @@ services:
     depends_on: [loki]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./data/logging/promtail:/promtail
       - ./scripts/logging/promtail-config.yml:/etc/promtail/config.yml:ro
     command: ["-config.file=/etc/promtail/config.yml"]
@@ -255,6 +254,7 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.8.1
     restart: unless-stopped
+    profiles: ["linux"]
     labels:
       logging: promtail
       app: node-exporter

@@ -2,7 +2,7 @@ groups:
   - name: datafoundry-system
     rules:
       - alert: NodeExporterDown
-        expr: up{job="node_exporter"} == 0
+        expr: count(up{job="node_exporter"}) > 0 and up{job="node_exporter"} == 0
         for: 2m
         labels:
           severity: critical

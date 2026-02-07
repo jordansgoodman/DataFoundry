@@ -30,7 +30,6 @@ ensure_permissions() {
 mkdir -p \
   data/airflow \
   data/postgres \
-  data/redis \
   data/logging/loki \
   data/logging/promtail \
   data/logging/grafana \

@@ -49,6 +49,7 @@ flowchart TD
 - **Promtail**: log shipping
 - **pgAdmin**: Postgres UI
 - **Node Exporter / StatsD Exporter / Alertmanager**: system metrics and alerts
+Note: Node Exporter runs only on Linux by default (`profiles: ["linux"]`).
 
 ## Single URL Access
 All UIs are routed through NGINX:
