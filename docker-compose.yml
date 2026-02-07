@@ -60,7 +60,7 @@ services:
     command: ["streamlit", "run", "/app/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.baseUrlPath=bi"]
     networks: [df]
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8501/_stcore/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8501/bi/_stcore/health || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 10
