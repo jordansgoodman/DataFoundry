@@ -16,6 +16,11 @@ if ! grep -q "^AIRFLOW__WEBSERVER__BASE_URL=" .env; then
   echo "AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080" >> .env
 fi
 
+# Normalize legacy base_url values that include the /airflow suffix
+if grep -q "^AIRFLOW__WEBSERVER__BASE_URL=.*\\/airflow" .env; then
+  sed -i.bak 's#^AIRFLOW__WEBSERVER__BASE_URL=.*#AIRFLOW__WEBSERVER__BASE_URL=http://localhost:8080#' .env
+fi
+
 ensure_permissions() {
   mkdir -p data
   if [[ "$(id -u)" -eq 0 ]]; then
