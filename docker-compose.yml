@@ -73,6 +73,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      bi:
+        condition: service_healthy
     labels:
       logging: promtail
       app: bi-worker
