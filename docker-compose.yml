@@ -302,11 +302,17 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
       PGADMIN_LISTEN_PORT: 5050
+      PGADMIN_CONFIG_SCRIPT_NAME: "/pgadmin"
     volumes:
       - ./data/pgadmin:/var/lib/pgadmin
       - ./data/pgadmin/servers.json:/pgadmin4/servers.json:ro
       - ./data/pgadmin/pgpass:/var/lib/pgadmin/pgpass:ro
     networks: [df]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:5050/ >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
   statsd-exporter:
     image: prom/statsd-exporter:v0.26.1
     restart: unless-stopped
