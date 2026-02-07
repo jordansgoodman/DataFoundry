@@ -302,7 +302,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
       PGADMIN_LISTEN_PORT: 5050
-      PGADMIN_CONFIG_SCRIPT_NAME: "/pgadmin"
+      PGADMIN_CONFIG_SCRIPT_NAME: "'/pgadmin'"
     volumes:
       - ./data/pgadmin:/var/lib/pgadmin
       - ./data/pgadmin/servers.json:/pgadmin4/servers.json:ro
