@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${HOST:-localhost}"
+HOST="${HOST:-localhost:8080}"
 BASE="http://${HOST}"
 
 check() {
