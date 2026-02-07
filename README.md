@@ -17,7 +17,7 @@ DataFoundry is a local‑first, fully open‑source analytics platform that inst
 flowchart TD
   U["Users"] --> N["NGINX"]
   N --> BI["DataFoundry BI (Streamlit)"]
-  N --> AF["Airflow (Web/Scheduler/Worker)"]
+  N --> AF["Airflow (Web/Scheduler)"]
   N --> GF["Grafana"]
   N --> PGA["pgAdmin"]
 
@@ -25,7 +25,6 @@ flowchart TD
   DLT --> PG["Postgres (Warehouse)"]
   BI --> PG
   BIW["BI Worker (Scheduled Queries)"] --> PG
-  R["Redis"] --> AF
 
   subgraph Logs
     L["Container logs"] --> PT["Promtail"] --> LK["Loki"] --> GF
@@ -40,10 +39,9 @@ flowchart TD
 ## Components
 - **NGINX**: single entrypoint + reverse proxy
 - **Postgres**: analytics warehouse and metadata
-- **Redis**: Celery broker for Airflow
 - **DataFoundry BI (Streamlit)**: BI UI and charts
 - **BI Worker**: scheduled query runner and cache warmer
-- **Airflow**: orchestration (webserver, scheduler, worker)
+- **Airflow**: orchestration (webserver, scheduler)
 - **dlt**: ingestion pipelines
 - **Grafana**: logs + metrics UI
 - **Prometheus**: metrics storage
@@ -98,7 +96,6 @@ Key variables:
 - `AIRFLOW_ADMIN_USERNAME`, `AIRFLOW_ADMIN_PASSWORD`, `AIRFLOW_ADMIN_EMAIL`
 - `AIRFLOW__CORE__FERNET_KEY`, `AIRFLOW__WEBSERVER__BASE_URL`, `AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX`
 - `AIRFLOW_UID`
-- `REDIS_PASSWORD`
 - `GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD`
 - `NYC_TAXI_URL`
 

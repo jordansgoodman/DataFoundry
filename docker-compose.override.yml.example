@@ -15,12 +15,6 @@ services:
   airflow-scheduler:
     mem_limit: 2g
     cpus: 1.0
-  airflow-worker:
-    mem_limit: 4g
-    cpus: 2.0
-  redis:
-    mem_limit: 512m
-    cpus: 0.5
   nginx:
     mem_limit: 256m
     cpus: 0.2
