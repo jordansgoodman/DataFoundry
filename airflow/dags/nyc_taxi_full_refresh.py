@@ -3,18 +3,17 @@ from __future__ import annotations
 import os
 from datetime import datetime
 
-import subprocess
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+from nyc_taxi_dlt import run as dlt_run
+
 DEFAULT_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet"
+
 
 def full_refresh() -> None:
     os.environ["NYC_TAXI_URL"] = os.environ.get("NYC_TAXI_URL", DEFAULT_URL)
-    subprocess.run(
-        ["python", "/opt/airflow/dags/nyc_taxi_dlt.py"],
-        check=True,
-    )
+    dlt_run()
 
 
 with DAG(
