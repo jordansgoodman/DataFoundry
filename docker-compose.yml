@@ -264,14 +264,6 @@ services:
     depends_on:
       setup:
         condition: service_completed_successfully
-      bi:
-        condition: service_healthy
-      airflow-webserver:
-        condition: service_healthy
-      grafana:
-        condition: service_healthy
-      pgadmin:
-        condition: service_healthy
     labels:
       logging: promtail
       app: nginx
