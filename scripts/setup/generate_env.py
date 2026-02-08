@@ -38,6 +38,8 @@ values.setdefault("DF_HOSTNAME", DEFAULT_HOST)
 values["BI_ADMIN_USERNAME"] = "admin"
 values["BI_BASE_URL"] = f"http://{DEFAULT_HOST}:8080/bi"
 values["AIRFLOW__WEBSERVER__BASE_URL"] = f"http://{DEFAULT_HOST}:8080/airflow"
+values["AIRFLOW__WEBSERVER__WEB_SERVER_HOST"] = "0.0.0.0"
+values["AIRFLOW__WEBSERVER__WEB_SERVER_PORT"] = "8080"
 values["GRAFANA_ROOT_URL"] = f"http://{DEFAULT_HOST}:8080/grafana/"
 values["PGADMIN_EMAIL"] = "admin@example.com"
 values["AIRFLOW_UID"] = str(os.getuid())
