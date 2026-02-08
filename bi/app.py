@@ -6,8 +6,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
-from passlib.hash import bcrypt
 from sqlalchemy import create_engine, text
+
+from db import init_metadata
 
 st.set_page_config(page_title="DataFoundry BI", layout="wide")
 
@@ -17,199 +18,6 @@ ADMIN_PASS = os.environ.get("BI_ADMIN_PASSWORD", "admin")
 CACHE_TTL_SECONDS = int(os.environ.get("BI_DASHBOARD_CACHE_TTL_SECONDS", "60"))
 
 engine = create_engine(DB_URL, pool_pre_ping=True)
-
-
-def init_metadata():
-    with engine.begin() as conn:
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_users (
-              id SERIAL PRIMARY KEY,
-              username TEXT UNIQUE NOT NULL,
-              password_hash TEXT NOT NULL,
-              role TEXT NOT NULL DEFAULT 'viewer',
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_workspaces (
-              id SERIAL PRIMARY KEY,
-              name TEXT UNIQUE NOT NULL,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_workspace_users (
-              id SERIAL PRIMARY KEY,
-              workspace_id INTEGER NOT NULL REFERENCES bi_workspaces(id) ON DELETE CASCADE,
-              username TEXT NOT NULL,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_datasources (
-              id SERIAL PRIMARY KEY,
-              workspace_id INTEGER NOT NULL REFERENCES bi_workspaces(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              sqlalchemy_uri TEXT NOT NULL,
-              is_default BOOLEAN NOT NULL DEFAULT FALSE,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_audit_log (
-              id SERIAL PRIMARY KEY,
-              username TEXT NOT NULL,
-              action TEXT NOT NULL,
-              details TEXT,
-              workspace_id INTEGER,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_saved_queries (
-              id SERIAL PRIMARY KEY,
-              workspace_id INTEGER NOT NULL REFERENCES bi_workspaces(id) ON DELETE CASCADE,
-              datasource_id INTEGER NOT NULL REFERENCES bi_datasources(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              sql TEXT NOT NULL,
-              owner TEXT NOT NULL,
-              description TEXT,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_charts (
-              id SERIAL PRIMARY KEY,
-              workspace_id INTEGER NOT NULL REFERENCES bi_workspaces(id) ON DELETE CASCADE,
-              query_id INTEGER NOT NULL REFERENCES bi_saved_queries(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              description TEXT,
-              owner TEXT NOT NULL,
-              viz_type TEXT NOT NULL DEFAULT 'table',
-              x_col TEXT,
-              y_col TEXT,
-              color_col TEXT,
-              agg TEXT,
-              options_json TEXT,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_dashboards (
-              id SERIAL PRIMARY KEY,
-              workspace_id INTEGER NOT NULL REFERENCES bi_workspaces(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              description TEXT,
-              owner TEXT NOT NULL,
-              filters_json TEXT,
-              created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_dashboard_items (
-              id SERIAL PRIMARY KEY,
-              dashboard_id INTEGER NOT NULL REFERENCES bi_dashboards(id) ON DELETE CASCADE,
-              chart_id INTEGER REFERENCES bi_charts(id) ON DELETE SET NULL,
-              query_id INTEGER REFERENCES bi_saved_queries(id) ON DELETE SET NULL,
-              title TEXT NOT NULL,
-              order_index INTEGER NOT NULL DEFAULT 0,
-              width INTEGER NOT NULL DEFAULT 6,
-              height INTEGER NOT NULL DEFAULT 6
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_schedules (
-              id SERIAL PRIMARY KEY,
-              query_id INTEGER NOT NULL REFERENCES bi_saved_queries(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              interval_minutes INTEGER NOT NULL DEFAULT 60,
-              enabled BOOLEAN NOT NULL DEFAULT TRUE,
-              last_run TIMESTAMP,
-              next_run TIMESTAMP
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_query_results (
-              id SERIAL PRIMARY KEY,
-              query_id INTEGER NOT NULL REFERENCES bi_saved_queries(id) ON DELETE CASCADE,
-              run_at TIMESTAMP NOT NULL DEFAULT NOW(),
-              row_count INTEGER NOT NULL,
-              data_json TEXT
-            );
-            """
-        ))
-
-        admin_hash = bcrypt.hash(ADMIN_PASS)
-        conn.execute(
-            text(
-                """
-                INSERT INTO bi_users (username, password_hash, role)
-                VALUES (:u, :p, 'admin')
-                ON CONFLICT (username) DO NOTHING
-                """
-            ),
-            {"u": ADMIN_USER, "p": admin_hash},
-        )
-
-        conn.execute(
-            text(
-                """
-                INSERT INTO bi_workspaces (name)
-                SELECT 'Default'
-                WHERE NOT EXISTS (SELECT 1 FROM bi_workspaces WHERE name='Default')
-                """
-            )
-        )
-        default_ws_id = conn.execute(
-            text("SELECT id FROM bi_workspaces WHERE name='Default'")
-        ).scalar()
-
-        conn.execute(
-            text(
-                """
-                INSERT INTO bi_datasources (workspace_id, name, sqlalchemy_uri, is_default)
-                SELECT :wid, 'Warehouse', :uri, TRUE
-                WHERE NOT EXISTS (
-                  SELECT 1 FROM bi_datasources WHERE workspace_id = :wid AND name = 'Warehouse'
-                )
-                """
-            ),
-            {"wid": default_ws_id, "uri": DB_URL},
-        )
-
-        conn.execute(
-            text(
-                """
-                INSERT INTO bi_workspace_users (workspace_id, username)
-                SELECT :wid, :u
-                WHERE NOT EXISTS (
-                  SELECT 1 FROM bi_workspace_users WHERE workspace_id = :wid AND username = :u
-                )
-                """
-            ),
-            {"wid": default_ws_id, "u": ADMIN_USER},
-        )
 
 
 def audit(username: str, action: str, details: str = "", workspace_id: int | None = None):
@@ -1147,7 +955,7 @@ def user_management():
             st.rerun()
 
 
-init_metadata()
+init_metadata(engine, ADMIN_USER, ADMIN_PASS, DB_URL)
 
 if not st.session_state.get("logged_in"):
     login()

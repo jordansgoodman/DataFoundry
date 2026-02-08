@@ -310,6 +310,8 @@ services:
         condition: service_completed_successfully
       loki:
         condition: service_healthy
+    environment:
+      DOCKER_API_VERSION: "1.44"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/logging/promtail:/promtail

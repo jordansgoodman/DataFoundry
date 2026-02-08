@@ -5,39 +5,15 @@ from datetime import datetime, timedelta
 import pandas as pd
 from sqlalchemy import create_engine, text
 
+from db import init_metadata
+
 DB_URL = os.environ.get("BI_DATABASE_URL")
 POLL_SECONDS = int(os.environ.get("BI_SCHEDULER_POLL_SECONDS", "30"))
+ADMIN_USER = os.environ.get("BI_ADMIN_USERNAME", "admin")
+ADMIN_PASS = os.environ.get("BI_ADMIN_PASSWORD", "admin")
 
 engine = create_engine(DB_URL, pool_pre_ping=True)
 engine_cache = {}
-
-
-def ensure_tables():
-    with engine.begin() as conn:
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_schedules (
-              id SERIAL PRIMARY KEY,
-              query_id INTEGER NOT NULL REFERENCES bi_saved_queries(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              interval_minutes INTEGER NOT NULL DEFAULT 60,
-              enabled BOOLEAN NOT NULL DEFAULT TRUE,
-              last_run TIMESTAMP,
-              next_run TIMESTAMP
-            );
-            """
-        ))
-        conn.execute(text(
-            """
-            CREATE TABLE IF NOT EXISTS bi_query_results (
-              id SERIAL PRIMARY KEY,
-              query_id INTEGER NOT NULL REFERENCES bi_saved_queries(id) ON DELETE CASCADE,
-              run_at TIMESTAMP NOT NULL DEFAULT NOW(),
-              row_count INTEGER NOT NULL,
-              data_json TEXT
-            );
-            """
-        ))
 
 
 def get_engine_for_datasource(datasource_id: int):
@@ -108,11 +84,11 @@ def process_schedule(row):
 
 
 if __name__ == "__main__":
-    ensure_tables()
+    init_metadata(engine, ADMIN_USER, ADMIN_PASS, DB_URL)
     while True:
         now = datetime.utcnow()
-        with engine.begin() as conn:
-            rows = conn.execute(
+    with engine.begin() as conn:
+        rows = conn.execute(
                 text(
                     """
                     SELECT id, query_id, interval_minutes
