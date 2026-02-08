@@ -9,21 +9,26 @@ fi
 if ! grep -q "^AIRFLOW_UID=" .env; then
   echo "AIRFLOW_UID=$(id -u)" >> .env
 fi
-if ! grep -q "^AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=" .env; then
-  echo "AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=/airflow" >> .env
-fi
 HOST_FROM_ENV="$(grep -E '^DF_HOSTNAME=' .env | tail -n1 | cut -d= -f2- || true)"
 if [[ -z "${HOST_FROM_ENV}" ]]; then
   HOST_FROM_ENV="localhost"
 fi
-AIRFLOW_BASE_URL="http://${HOST_FROM_ENV}:8080"
+AIRFLOW_BASE_URL="http://${HOST_FROM_ENV}:8080/airflow"
 
+if ! grep -q "^AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=" .env; then
+  echo "AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=/airflow" >> .env
+fi
 if ! grep -q "^AIRFLOW__WEBSERVER__BASE_URL=" .env; then
   echo "AIRFLOW__WEBSERVER__BASE_URL=${AIRFLOW_BASE_URL}" >> .env
 fi
 
-# Normalize legacy base_url values that include the /airflow suffix
-if grep -q "^AIRFLOW__WEBSERVER__BASE_URL=.*\\/airflow" .env; then
+# Normalize url_prefix and base_url values
+if grep -q "^AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=" .env; then
+  sed -i.bak "s#^AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=.*#AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX=/airflow#" .env
+fi
+
+# Normalize base_url values to include /airflow
+if grep -q "^AIRFLOW__WEBSERVER__BASE_URL=" .env; then
   sed -i.bak "s#^AIRFLOW__WEBSERVER__BASE_URL=.*#AIRFLOW__WEBSERVER__BASE_URL=${AIRFLOW_BASE_URL}#" .env
 fi
 
