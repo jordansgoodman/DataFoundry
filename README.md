@@ -60,16 +60,11 @@ All UIs are routed through NGINX:
 
 ## Quickstart
 1. Ensure Docker is running.
-2. Run the bootstrap.
+2. Start the stack.
 3. Open BI, Airflow, Grafana, and pgAdmin via NGINX.
 
 ```bash
-./bootstrap.sh
-```
-
-On Windows:
-```powershell
-.\bootstrap.ps1
+docker compose up -d
 ```
 
 ## Prerequisites
@@ -77,13 +72,11 @@ On Windows:
 - Docker and Docker Compose
 - 4 vCPU / 16 GB RAM minimum (8 vCPU / 32 GB recommended)
 
-## What Bootstrap Does
-The `bootstrap.sh` script:
-- Generates `.env` if missing (writes credentials to `data/credentials.txt`)
-- Creates persistent volumes under `./data`
+## First-Run Setup
+The Compose stack includes an internal `setup` service that:
+- Creates persistent folders under `./data`
+- Prepares pgAdmin auto‑registration files
 - Applies safe permissions for all services
-- Starts the full Docker Compose stack
-- Leaves the stack running behind NGINX
 
 ## Configuration
 All user configuration is provided via `.env`. Defaults are opinionated and safe to run locally.
@@ -168,7 +161,7 @@ Reset data:
 
 Common issues:
 - Port conflicts: change NGINX port mapping in `docker-compose.yml`
-- Permissions: rerun `./bootstrap.sh` (it fixes ownership and modes)
+- Permissions: rerun `docker compose up -d` (setup service fixes ownership and modes)
 
 ## Local Dev (LSP / Editor Setup)
 This repo is containerized, so your editor needs a local Python environment for LSP/type hints.
@@ -197,11 +190,10 @@ This is a single‑node architecture. For production‑grade deployments:
 ## Supported Platforms
 - Linux: native Docker
 - macOS: Docker Desktop
-- Windows: Docker Desktop + `bootstrap.ps1`
+- Windows: Docker Desktop
 
 ## File Structure
 - `docker-compose.yml` runtime services
-- `bootstrap.sh` one‑command installer
 - `docker/` images and Dockerfiles
 - `scripts/` init, bootstrap, and provisioning
 - `airflow/dags/` ingestion workflows
