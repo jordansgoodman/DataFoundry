@@ -34,8 +34,8 @@ services:
               "Group": "Servers",
               "Host": "postgres",
               "Port": 5432,
-              "MaintenanceDB": "${POSTGRES_DB}",
-              "Username": "${POSTGRES_USER}",
+              "MaintenanceDB": "${POSTGRES_DB:-datafoundry}",
+              "Username": "${POSTGRES_USER:-datafoundry}",
               "SSLMode": "prefer"
             }
           }
@@ -44,7 +44,7 @@ services:
         fi
         if [ ! -f /data/pgadmin/pgpass ]; then
           cat > /data/pgadmin/pgpass <<PGPASS
-        postgres:5432:${POSTGRES_DB}:${POSTGRES_USER}:${POSTGRES_PASSWORD}
+        postgres:5432:${POSTGRES_DB:-datafoundry}:${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}
         PGPASS
           chmod 600 /data/pgadmin/pgpass
         fi
@@ -68,7 +68,7 @@ services:
       - ./scripts/db/init.sh:/docker-entrypoint-initdb.d/01_init.sh:ro
     networks: [df]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-datafoundry} -d ${POSTGRES_DB:-datafoundry}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -166,7 +166,7 @@ services:
       - ./data/airflow:/opt/airflow
       - ./scripts/airflow/airflow.cfg:/opt/airflow/airflow.cfg:ro
       - ./airflow/dags:/opt/airflow/dags:ro
-    command: ["bash", "-c", "airflow db init && airflow users create --username ${AIRFLOW_ADMIN_USERNAME} --password ${AIRFLOW_ADMIN_PASSWORD} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL} || true && airflow webserver"]
+    command: ["bash", "-c", "airflow db init && airflow users create --username ${AIRFLOW_ADMIN_USERNAME:-airflow} --password ${AIRFLOW_ADMIN_PASSWORD:-airflow123} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-airflow@datafoundry.local} || true && airflow webserver"]
     networks: [df]
     healthcheck:
       test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  urllib.request.urlopen('http://localhost:8080/airflow/health', timeout=5)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
