@@ -170,6 +170,23 @@ Common issues:
 - Port conflicts: change NGINX port mapping in `docker-compose.yml`
 - Permissions: rerun `./bootstrap.sh` (it fixes ownership and modes)
 
+## Local Dev (LSP / Editor Setup)
+This repo is containerized, so your editor needs a local Python environment for LSP/type hints.
+
+One‑time setup:
+```bash
+./scripts/dev/setup_venv.sh
+```
+
+This creates `.venv/` and installs a lean dev dependency set from:
+- `/Users/jordangoodman/Documents/DataFoundry/requirements-dev.txt`
+
+For VS Code, a workspace config is included:
+- `/Users/jordangoodman/Documents/DataFoundry/.vscode/settings.json`
+
+If you use another editor, point it at:
+- `/Users/jordangoodman/Documents/DataFoundry/.venv/bin/python`
+
 ## Production Notes
 This is a single‑node architecture. For production‑grade deployments:
 - Use fast disks for Postgres and Loki volumes

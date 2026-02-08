@@ -1,0 +1,13 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": false,
+  "stubPath": "stubs",
+  "extraPaths": [
+    "stubs",
+    "airflow/dags",
+    "bi",
+    "scripts"
+  ]
+}

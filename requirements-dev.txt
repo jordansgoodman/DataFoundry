@@ -1,0 +1,14 @@
+# Local dev + LSP requirements (kept lean; no Airflow install)
+pandas==2.2.2
+pyarrow==15.0.2
+requests==2.32.3
+psycopg2-binary==2.9.9
+SQLAlchemy==1.4.52
+dlt==1.6.0
+streamlit==1.33.0
+plotly==5.22.0
+passlib[bcrypt]==1.7.4
+pyright==1.1.392
+ruff==0.6.9
+black==24.8.0
+types-requests==2.32.0.20240712
