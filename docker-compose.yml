@@ -108,7 +108,7 @@ services:
     command: ["bash", "-c", "airflow db init && airflow users create --username ${AIRFLOW_ADMIN_USERNAME} --password ${AIRFLOW_ADMIN_PASSWORD} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL} || true && airflow webserver"]
     networks: [df]
     healthcheck:
-      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  urllib.request.urlopen('http://localhost:8080/health', timeout=5)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  urllib.request.urlopen('http://localhost:8080/airflow/health', timeout=5)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
       interval: 20s
       timeout: 5s
       retries: 10
