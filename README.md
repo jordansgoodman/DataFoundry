@@ -16,11 +16,13 @@ DataFoundry is a local‑first, fully open‑source analytics platform that inst
 ```mermaid
 flowchart TD
   U["Users"] --> AF["Airflow (Web/Scheduler)"]
+  U --> SS["Superset"]
   U --> PGA["pgAdmin"]
 
   AF -->|triggers| DLT["dlt ingestion"]
   DLT --> PG["Postgres (Warehouse)"]
   AF --> PG
+  SS --> PG
   PGA --> PG
 ```
 
@@ -28,10 +30,12 @@ flowchart TD
 - **Postgres**: analytics warehouse and metadata
 - **Airflow**: orchestration (webserver, scheduler)
 - **dlt**: ingestion pipelines
+- **Superset**: BI and dashboarding
 - **pgAdmin**: Postgres UI
 
 ## Endpoints
 - Airflow: `http://<host>:8080/`
+- Superset: `http://<host>:8088/`
 - pgAdmin: `http://<host>:5050/`
 - Postgres: `localhost:5432`
 
@@ -62,10 +66,12 @@ Key variables:
 - `DF_HOSTNAME`
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `AIRFLOW_DB`
+- `SUPERSET_DB`
 - `AIRFLOW_ADMIN_USERNAME`, `AIRFLOW_ADMIN_PASSWORD`, `AIRFLOW_ADMIN_EMAIL`
 - `AIRFLOW__CORE__FERNET_KEY`, `AIRFLOW__WEBSERVER__BASE_URL`
 - `AIRFLOW__WEBSERVER__WEB_SERVER_HOST`, `AIRFLOW__WEBSERVER__WEB_SERVER_PORT`
 - `AIRFLOW_UID`
+- `SUPERSET_ADMIN_USERNAME`, `SUPERSET_ADMIN_PASSWORD`, `SUPERSET_ADMIN_EMAIL`, `SUPERSET_SECRET_KEY`
 - `PGADMIN_EMAIL`, `PGADMIN_PASSWORD`
 - `NYC_TAXI_URL`
 

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 AF_DB="${AIRFLOW_DB:-airflow}"
+SS_DB="${SUPERSET_DB:-superset}"
 
 create_db() {
   local db="$1"
@@ -14,6 +15,7 @@ create_db() {
 }
 
 create_db "$AF_DB"
+create_db "$SS_DB"
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d "$POSTGRES_DB" <<'SQL'
 DO $$

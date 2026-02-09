@@ -13,6 +13,8 @@ DEFAULT_HOST = os.environ.get("DF_HOSTNAME", "localhost")
 KEYS_TO_GEN = {
     "POSTGRES_PASSWORD": 24,
     "AIRFLOW_ADMIN_PASSWORD": 24,
+    "SUPERSET_ADMIN_PASSWORD": 24,
+    "SUPERSET_SECRET_KEY": 32,
     "PGADMIN_PASSWORD": 24,
 }
 
@@ -22,9 +24,14 @@ DEFAULTS = {
     "POSTGRES_PASSWORD": "datafoundry",
     "POSTGRES_DB": "datafoundry",
     "AIRFLOW_DB": "airflow",
+    "SUPERSET_DB": "superset",
     "AIRFLOW_ADMIN_USERNAME": "airflow",
     "AIRFLOW_ADMIN_PASSWORD": "airflow123",
     "AIRFLOW_ADMIN_EMAIL": "airflow@datafoundry.local",
+    "SUPERSET_ADMIN_USERNAME": "superset",
+    "SUPERSET_ADMIN_PASSWORD": "superset123",
+    "SUPERSET_ADMIN_EMAIL": "superset@datafoundry.local",
+    "SUPERSET_SECRET_KEY": "superset-secret",
     "PGADMIN_EMAIL": "admin@example.com",
     "PGADMIN_PASSWORD": "pgadmin123",
     "AIRFLOW__WEBSERVER__WEB_SERVER_HOST": "0.0.0.0",
@@ -101,6 +108,9 @@ creds = [
     "",
     f"Airflow admin: {effective.get('AIRFLOW_ADMIN_USERNAME', 'airflow')}",
     f"Airflow password: {effective.get('AIRFLOW_ADMIN_PASSWORD', 'airflow123')}",
+    "",
+    f"Superset admin: {effective.get('SUPERSET_ADMIN_USERNAME', 'superset')}",
+    f"Superset password: {effective.get('SUPERSET_ADMIN_PASSWORD', 'superset123')}",
     "",
     f"pgAdmin email: {effective.get('PGADMIN_EMAIL', 'admin@example.com')}",
     f"pgAdmin password: {effective.get('PGADMIN_PASSWORD', 'pgadmin123')}",
