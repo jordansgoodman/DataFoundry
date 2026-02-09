@@ -1,7 +1,0 @@
-[Unit]
-Description=DataFoundry Postgres backup
-
-[Service]
-Type=oneshot
-WorkingDirectory=/opt/datafoundry
-ExecStart=/bin/bash -lc './scripts/backup/backup_run.sh'

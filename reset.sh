@@ -12,7 +12,7 @@ This will:
 - Stop all containers
 - Delete ./data
 - Remove .env and data/credentials.txt (unless --keep-env)
-- Re-run bootstrap
+- Recreate local data directories
 WARN
 
 echo -n "Type 'reset' to continue: "
@@ -39,4 +39,4 @@ else
   chmod -R a+rwX data || true
 fi
 
-./bootstrap.sh
+docker compose up -d
