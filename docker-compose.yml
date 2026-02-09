@@ -114,11 +114,18 @@ services:
       AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-airflow}
       AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-airflow123}
       AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-airflow@datafoundry.local}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__HOST: postgres
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__PORT: 5432
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__USERNAME: ${POSTGRES_USER:-datafoundry}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__HOST: postgres
+      DESTINATION__POSTGRES__CREDENTIALS__PORT: 5432
+      DESTINATION__POSTGRES__CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__USERNAME: ${POSTGRES_USER:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
+      AIRFLOW_VAR_DLT_SECRETS_TOML: |
+        [destination.postgres.credentials]
+        host = "postgres"
+        port = 5432
+        database = "${POSTGRES_DB:-datafoundry}"
+        username = "${POSTGRES_USER:-datafoundry}"
+        password = "${POSTGRES_PASSWORD:-datafoundry}"
       NYC_TAXI_URL: ${NYC_TAXI_URL:-https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet}
     volumes:
       - ./data/airflow:/opt/airflow
@@ -150,11 +157,18 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${AIRFLOW_DB:-airflow}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__HOST: postgres
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__PORT: 5432
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__USERNAME: ${POSTGRES_USER:-datafoundry}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__HOST: postgres
+      DESTINATION__POSTGRES__CREDENTIALS__PORT: 5432
+      DESTINATION__POSTGRES__CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__USERNAME: ${POSTGRES_USER:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
+      AIRFLOW_VAR_DLT_SECRETS_TOML: |
+        [destination.postgres.credentials]
+        host = "postgres"
+        port = 5432
+        database = "${POSTGRES_DB:-datafoundry}"
+        username = "${POSTGRES_USER:-datafoundry}"
+        password = "${POSTGRES_PASSWORD:-datafoundry}"
       NYC_TAXI_URL: ${NYC_TAXI_URL:-https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet}
     volumes:
       - ./data/airflow:/opt/airflow
@@ -196,11 +210,11 @@ services:
     environment:
       DLT_LOG_LEVEL: INFO
       DLT_DB_DESTINATION: postgres
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__HOST: postgres
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__PORT: 5432
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__USERNAME: ${POSTGRES_USER:-datafoundry}
-      DLT_DESTINATION_POSTGRES_CREDENTIALS__PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__HOST: postgres
+      DESTINATION__POSTGRES__CREDENTIALS__PORT: 5432
+      DESTINATION__POSTGRES__CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__USERNAME: ${POSTGRES_USER:-datafoundry}
+      DESTINATION__POSTGRES__CREDENTIALS__PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
     volumes:
       - ./scripts/dlt:/app
     command: ["bash", "-c", "sleep infinity"]
