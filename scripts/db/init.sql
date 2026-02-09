@@ -1,4 +1,4 @@
--- Basic roles and schemas for DataFoundry
+-- Basic roles and schemas for DataSpec
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'analytics') THEN

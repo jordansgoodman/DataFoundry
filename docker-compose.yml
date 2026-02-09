@@ -41,7 +41,7 @@ services:
         {
           "Servers": {
             "1": {
-              "Name": "DataFoundry Postgres",
+              "Name": "DataSpec Postgres",
               "Group": "Servers",
               "Host": "postgres",
               "Port": 5432,
@@ -60,7 +60,7 @@ services:
           chmod 600 /data/pgadmin/pgpass
         fi
         cat > /data/credentials.txt <<CREDS
-        DataFoundry Credentials (auto-generated)
+        DataSpec Credentials (auto-generated)
         ========================================
         DF_HOSTNAME=${DF_HOSTNAME:-localhost}
 

@@ -101,7 +101,7 @@ if generated_env:
 # Write credentials file (always)
 CREDS_FILE.parent.mkdir(parents=True, exist_ok=True)
 creds = [
-    "DataFoundry Credentials (auto-generated)",
+    "DataSpec Credentials (auto-generated)",
     "========================================",
     f"DF_HOSTNAME={host}",
     "",

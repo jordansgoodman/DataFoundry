@@ -1,6 +1,6 @@
-# DataFoundry
+# DataSpec
 
-DataFoundry is a local‑first, fully open‑source analytics platform that installs a complete data + orchestration stack on a single machine with one command. It is designed to be self‑hosted, cloud‑independent, and repeatable for small teams.
+DataSpec is a local‑first, fully open‑source analytics platform that installs a complete data + orchestration stack on a single machine with one command. It is designed to be self‑hosted, cloud‑independent, and repeatable for small teams.
 
 ## Core Principles
 - Local‑only, no cloud assumptions
@@ -154,13 +154,13 @@ One‑time setup:
 ```
 
 This creates `.venv/` and installs a lean dev dependency set from:
-- `/Users/jordangoodman/Documents/DataFoundry/requirements-dev.txt`
+- `./requirements-dev.txt`
 
 For VS Code, a workspace config is included:
-- `/Users/jordangoodman/Documents/DataFoundry/.vscode/settings.json`
+- `./.vscode/settings.json`
 
 If you use another editor, point it at:
-- `/Users/jordangoodman/Documents/DataFoundry/.venv/bin/python`
+- `./.venv/bin/python`
 
 ## Production Notes
 This is a single‑node architecture. For production‑grade deployments:
