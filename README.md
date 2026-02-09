@@ -18,12 +18,17 @@ flowchart TD
   U["Users"] --> AF["Airflow (Web/Scheduler)"]
   U --> SS["Superset"]
   U --> PGA["pgAdmin"]
+  U --> GF["Grafana (Logs)"]
 
   AF -->|triggers| DLT["dlt ingestion"]
   DLT --> PG["Postgres (Warehouse)"]
   AF --> PG
   SS --> PG
   PGA --> PG
+
+  subgraph Logs
+    L["Container logs"] --> PT["Promtail"] --> LK["Loki"] --> GF
+  end
 ```
 
 ## Components
