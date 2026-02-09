@@ -31,11 +31,13 @@ flowchart TD
 - **Airflow**: orchestration (webserver, scheduler)
 - **dlt**: ingestion pipelines
 - **Superset**: BI and dashboarding
+- **Grafana + Loki + Promtail**: log capture and dashboard
 - **pgAdmin**: Postgres UI
 
 ## Endpoints
 - Airflow: `http://<host>:8080/`
 - Superset: `http://<host>:8088/`
+- Logs (Grafana): `http://<host>:3001/`
 - pgAdmin: `http://<host>:5050/`
 - Postgres: `localhost:5432`
 
@@ -72,6 +74,7 @@ Key variables:
 - `AIRFLOW__WEBSERVER__WEB_SERVER_HOST`, `AIRFLOW__WEBSERVER__WEB_SERVER_PORT`
 - `AIRFLOW_UID`
 - `SUPERSET_ADMIN_USERNAME`, `SUPERSET_ADMIN_PASSWORD`, `SUPERSET_ADMIN_EMAIL`, `SUPERSET_SECRET_KEY`
+- `GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD`
 - `PGADMIN_EMAIL`, `PGADMIN_PASSWORD`
 - `NYC_TAXI_URL`
 

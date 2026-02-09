@@ -15,6 +15,7 @@ KEYS_TO_GEN = {
     "AIRFLOW_ADMIN_PASSWORD": 24,
     "SUPERSET_ADMIN_PASSWORD": 24,
     "SUPERSET_SECRET_KEY": 32,
+    "GRAFANA_ADMIN_PASSWORD": 24,
     "PGADMIN_PASSWORD": 24,
 }
 
@@ -32,6 +33,8 @@ DEFAULTS = {
     "SUPERSET_ADMIN_PASSWORD": "superset123",
     "SUPERSET_ADMIN_EMAIL": "superset@datafoundry.local",
     "SUPERSET_SECRET_KEY": "superset-secret",
+    "GRAFANA_ADMIN_USER": "admin",
+    "GRAFANA_ADMIN_PASSWORD": "admin123",
     "PGADMIN_EMAIL": "admin@example.com",
     "PGADMIN_PASSWORD": "pgadmin123",
     "AIRFLOW__WEBSERVER__WEB_SERVER_HOST": "0.0.0.0",
@@ -111,6 +114,9 @@ creds = [
     "",
     f"Superset admin: {effective.get('SUPERSET_ADMIN_USERNAME', 'superset')}",
     f"Superset password: {effective.get('SUPERSET_ADMIN_PASSWORD', 'superset123')}",
+    "",
+    f"Grafana admin: {effective.get('GRAFANA_ADMIN_USER', 'admin')}",
+    f"Grafana password: {effective.get('GRAFANA_ADMIN_PASSWORD', 'admin123')}",
     "",
     f"pgAdmin email: {effective.get('PGADMIN_EMAIL', 'admin@example.com')}",
     f"pgAdmin password: {effective.get('PGADMIN_PASSWORD', 'pgadmin123')}",

@@ -15,6 +15,8 @@ services:
       SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-superset}
       SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-superset123}
       SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-superset@datafoundry.local}
+      GRAFANA_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GRAFANA_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
       PGADMIN_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
       PGADMIN_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin123}
     volumes:
@@ -29,7 +31,10 @@ services:
           /data/airflow/.dlt \
           /data/postgres \
           /data/pgadmin \
-          /data/superset
+          /data/superset \
+          /data/logging/loki \
+          /data/logging/promtail \
+          /data/logging/grafana
         chmod -R a+rwX /data || true
         if [ ! -f /data/pgadmin/servers.json ]; then
           cat > /data/pgadmin/servers.json <<JSON
@@ -68,6 +73,9 @@ services:
 
         Superset admin: ${SUPERSET_ADMIN_USERNAME:-superset}
         Superset password: ${SUPERSET_ADMIN_PASSWORD:-superset123}
+
+        Grafana admin: ${GRAFANA_ADMIN_USER:-admin}
+        Grafana password: ${GRAFANA_ADMIN_PASSWORD:-admin123}
 
         pgAdmin email: ${PGADMIN_EMAIL:-admin@example.com}
         pgAdmin password: ${PGADMIN_PASSWORD:-pgadmin123}
@@ -257,6 +265,70 @@ services:
     networks: [df]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8088/health >/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+  loki:
+    image: grafana/loki:2.9.5
+    restart: unless-stopped
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      airflow-webserver:
+        condition: service_healthy
+      pgadmin:
+        condition: service_healthy
+      superset:
+        condition: service_healthy
+    volumes:
+      - ./data/logging/loki:/loki
+      - ./scripts/logging/loki-config.yml:/etc/loki/config.yml:ro
+    command: ["-config.file=/etc/loki/config.yml"]
+    networks: [df]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3100/ready || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+  promtail:
+    image: grafana/promtail:2.9.5
+    restart: unless-stopped
+    depends_on:
+      loki:
+        condition: service_healthy
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/logging/promtail:/promtail
+      - ./scripts/logging/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: ["-config.file=/etc/promtail/config.yml"]
+    networks: [df]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9080/ready || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:10.4.3
+    restart: unless-stopped
+    depends_on:
+      loki:
+        condition: service_healthy
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./data/logging/grafana:/var/lib/grafana
+      - ./scripts/logging/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    networks: [df]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/health >/dev/null || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 10
