@@ -12,6 +12,9 @@ DEFAULT_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2
 
 
 def full_refresh() -> None:
+    os.environ.setdefault("HOME", "/opt/airflow")
+    os.environ.setdefault("DLT_HOME", "/opt/airflow/.dlt")
+    os.environ.setdefault("DLT_PROJECT_DIR", "/opt/airflow")
     os.environ["NYC_TAXI_URL"] = os.environ.get("NYC_TAXI_URL", DEFAULT_URL)
     dlt_run()
 

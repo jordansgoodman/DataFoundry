@@ -26,6 +26,7 @@ services:
         set -eu
         mkdir -p \
           /data/airflow \
+          /data/airflow/.dlt \
           /data/postgres \
           /data/pgadmin \
           /data/superset
@@ -110,6 +111,8 @@ services:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     environment:
+      HOME: /opt/airflow
+      DLT_HOME: /opt/airflow/.dlt
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
@@ -161,6 +164,8 @@ services:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     environment:
+      HOME: /opt/airflow
+      DLT_HOME: /opt/airflow/.dlt
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
@@ -194,6 +199,8 @@ services:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     environment:
+      HOME: /opt/airflow
+      DLT_HOME: /opt/airflow/.dlt
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${AIRFLOW_DB:-airflow}
       NYC_TAXI_URL: ${NYC_TAXI_URL:-https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet}
