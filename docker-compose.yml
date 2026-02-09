@@ -5,9 +5,15 @@ services:
     image: alpine:3.20
     restart: "no"
     environment:
+      DF_HOSTNAME: ${DF_HOSTNAME:-localhost}
       POSTGRES_DB: ${POSTGRES_DB:-datafoundry}
       POSTGRES_USER: ${POSTGRES_USER:-datafoundry}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datafoundry}
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-airflow}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-airflow123}
+      AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-airflow@datafoundry.local}
+      PGADMIN_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin123}
     volumes:
       - ./data:/data
     command:
@@ -43,6 +49,22 @@ services:
         PGPASS
           chmod 600 /data/pgadmin/pgpass
         fi
+        cat > /data/credentials.txt <<CREDS
+        DataFoundry Credentials (auto-generated)
+        ========================================
+        DF_HOSTNAME=${DF_HOSTNAME:-localhost}
+
+        Postgres user: ${POSTGRES_USER:-datafoundry}
+        Postgres password: ${POSTGRES_PASSWORD:-datafoundry}
+        Postgres database: ${POSTGRES_DB:-datafoundry}
+
+        Airflow admin: ${AIRFLOW_ADMIN_USERNAME:-airflow}
+        Airflow password: ${AIRFLOW_ADMIN_PASSWORD:-airflow123}
+
+        pgAdmin email: ${PGADMIN_EMAIL:-admin@example.com}
+        pgAdmin password: ${PGADMIN_PASSWORD:-pgadmin123}
+        CREDS
+        chmod 600 /data/credentials.txt || true
     networks: [df]
 
   postgres:
