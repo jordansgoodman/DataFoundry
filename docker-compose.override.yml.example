@@ -3,36 +3,12 @@ services:
   postgres:
     mem_limit: 4g
     cpus: 2.0
-  bi:
-    mem_limit: 2g
-    cpus: 1.0
-  bi-worker:
-    mem_limit: 512m
-    cpus: 0.5
   airflow-webserver:
     mem_limit: 2g
     cpus: 1.0
   airflow-scheduler:
     mem_limit: 2g
     cpus: 1.0
-  nginx:
-    mem_limit: 256m
-    cpus: 0.2
-  grafana:
+  pgadmin:
     mem_limit: 512m
     cpus: 0.5
-  loki:
-    mem_limit: 1g
-    cpus: 0.5
-  prometheus:
-    mem_limit: 1g
-    cpus: 0.5
-  node-exporter:
-    mem_limit: 256m
-    cpus: 0.2
-  statsd-exporter:
-    mem_limit: 256m
-    cpus: 0.2
-  alertmanager:
-    mem_limit: 256m
-    cpus: 0.2

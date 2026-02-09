@@ -12,9 +12,7 @@ DEFAULT_HOST = os.environ.get("DF_HOSTNAME", "localhost")
 
 KEYS_TO_GEN = {
     "POSTGRES_PASSWORD": 24,
-    "BI_ADMIN_PASSWORD": 24,
     "AIRFLOW_ADMIN_PASSWORD": 24,
-    "GRAFANA_ADMIN_PASSWORD": 24,
     "PGADMIN_PASSWORD": 24,
 }
 
@@ -24,17 +22,14 @@ DEFAULTS = {
     "POSTGRES_PASSWORD": "datafoundry",
     "POSTGRES_DB": "datafoundry",
     "AIRFLOW_DB": "airflow",
-    "BI_ADMIN_USERNAME": "admin",
-    "BI_ADMIN_PASSWORD": "admin123",
     "AIRFLOW_ADMIN_USERNAME": "airflow",
     "AIRFLOW_ADMIN_PASSWORD": "airflow123",
     "AIRFLOW_ADMIN_EMAIL": "airflow@datafoundry.local",
-    "GRAFANA_ADMIN_PASSWORD": "admin123",
     "PGADMIN_EMAIL": "admin@example.com",
     "PGADMIN_PASSWORD": "pgadmin123",
     "AIRFLOW__WEBSERVER__WEB_SERVER_HOST": "0.0.0.0",
     "AIRFLOW__WEBSERVER__WEB_SERVER_PORT": "8080",
-    "AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX": "/airflow",
+    "AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX": "",
 }
 
 
@@ -77,9 +72,7 @@ effective.update(env_values)
 effective.update(values)
 
 host = effective.get("DF_HOSTNAME", DEFAULT_HOST)
-effective.setdefault("BI_BASE_URL", f"http://{host}:8080/bi")
-effective.setdefault("AIRFLOW__WEBSERVER__BASE_URL", f"http://{host}:8080/airflow")
-effective.setdefault("GRAFANA_ROOT_URL", f"http://{host}:8080/grafana/")
+effective.setdefault("AIRFLOW__WEBSERVER__BASE_URL", f"http://{host}:8080")
 effective.setdefault("AIRFLOW_UID", str(os.getuid()))
 
 if generated_env:
@@ -106,14 +99,8 @@ creds = [
     f"Postgres password: {effective.get('POSTGRES_PASSWORD', 'datafoundry')}",
     f"Postgres database: {effective.get('POSTGRES_DB', 'datafoundry')}",
     "",
-    f"BI admin: {effective.get('BI_ADMIN_USERNAME', 'admin')}",
-    f"BI password: {effective.get('BI_ADMIN_PASSWORD', 'admin123')}",
-    "",
     f"Airflow admin: {effective.get('AIRFLOW_ADMIN_USERNAME', 'airflow')}",
     f"Airflow password: {effective.get('AIRFLOW_ADMIN_PASSWORD', 'airflow123')}",
-    "",
-    f"Grafana admin: admin",
-    f"Grafana password: {effective.get('GRAFANA_ADMIN_PASSWORD', 'admin123')}",
     "",
     f"pgAdmin email: {effective.get('PGADMIN_EMAIL', 'admin@example.com')}",
     f"pgAdmin password: {effective.get('PGADMIN_PASSWORD', 'pgadmin123')}",

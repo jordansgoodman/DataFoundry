@@ -18,14 +18,6 @@ services:
         mkdir -p \
           /data/airflow \
           /data/postgres \
-          /data/logging/loki/index \
-          /data/logging/loki/cache \
-          /data/logging/loki/chunks \
-          /data/logging/loki/compactor \
-          /data/logging/promtail \
-          /data/logging/grafana \
-          /data/metrics/prometheus \
-          /data/metrics/alertmanager \
           /data/pgadmin
         chmod -R a+rwX /data || true
         if [ ! -f /data/pgadmin/servers.json ]; then
@@ -52,15 +44,13 @@ services:
           chmod 600 /data/pgadmin/pgpass
         fi
     networks: [df]
+
   postgres:
     image: postgres:15
     restart: unless-stopped
     depends_on:
       setup:
         condition: service_completed_successfully
-    labels:
-      logging: promtail
-      app: postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-datafoundry}
       POSTGRES_USER: ${POSTGRES_USER:-datafoundry}
@@ -69,63 +59,14 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
       - ./scripts/db/init.sh:/docker-entrypoint-initdb.d/01_init.sh:ro
+    ports:
+      - "5432:5432"
     networks: [df]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-datafoundry} -d ${POSTGRES_DB:-datafoundry}"]
       interval: 10s
       timeout: 5s
       retries: 10
-
-  bi:
-    build:
-      context: ./docker/bi
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
-    labels:
-      logging: promtail
-      app: bi
-    environment:
-      BI_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${POSTGRES_DB:-datafoundry}
-      BI_ADMIN_USERNAME: ${BI_ADMIN_USERNAME:-admin}
-      BI_ADMIN_PASSWORD: ${BI_ADMIN_PASSWORD:-admin123}
-      BI_BASE_URL: ${BI_BASE_URL:-http://localhost:8080/bi}
-    volumes:
-      - ./bi:/app
-    command: ["streamlit", "run", "/app/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.baseUrlPath=bi"]
-    networks: [df]
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8501/bi/_stcore/health || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
-  bi-worker:
-    build:
-      context: ./docker/bi
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
-      bi:
-        condition: service_healthy
-    labels:
-      logging: promtail
-      app: bi-worker
-    environment:
-      BI_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${POSTGRES_DB:-datafoundry}
-      BI_SCHEDULER_POLL_SECONDS: ${BI_SCHEDULER_POLL_SECONDS:-30}
-    volumes:
-      - ./bi:/app
-    command: ["python", "/app/worker.py"]
-    networks: [df]
 
   airflow-webserver:
     build:
@@ -138,24 +79,16 @@ services:
       postgres:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
-    labels:
-      logging: promtail
-      app: airflow-webserver
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${AIRFLOW_DB:-airflow}
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
-      AIRFLOW__WEBSERVER__BASE_URL: ${AIRFLOW__WEBSERVER__BASE_URL:-http://localhost:8080/airflow}
-      AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX: /airflow
+      AIRFLOW__WEBSERVER__BASE_URL: ${AIRFLOW__WEBSERVER__BASE_URL:-http://localhost:8080}
+      AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX: ""
       AIRFLOW__WEBSERVER__WEB_SERVER_HOST: 0.0.0.0
       AIRFLOW__WEBSERVER__WEB_SERVER_PORT: "8080"
-      AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: "true"
-      AIRFLOW__METRICS__STATSD_ON: "true"
-      AIRFLOW__METRICS__STATSD_HOST: statsd-exporter
-      AIRFLOW__METRICS__STATSD_PORT: "9125"
-      AIRFLOW__METRICS__STATSD_PREFIX: airflow
       AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-airflow}
       AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-airflow123}
       AIRFLOW_ADMIN_EMAIL: ${AIRFLOW_ADMIN_EMAIL:-airflow@datafoundry.local}
@@ -170,9 +103,11 @@ services:
       - ./scripts/airflow/airflow.cfg:/opt/airflow/airflow.cfg:ro
       - ./airflow/dags:/opt/airflow/dags:ro
     command: ["bash", "-c", "airflow db init && airflow users create --username ${AIRFLOW_ADMIN_USERNAME:-airflow} --password ${AIRFLOW_ADMIN_PASSWORD:-airflow123} --firstname Admin --lastname User --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-airflow@datafoundry.local} || true && airflow webserver"]
+    ports:
+      - "8080:8080"
     networks: [df]
     healthcheck:
-      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  urllib.request.urlopen('http://localhost:8080/airflow/health', timeout=5)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n  urllib.request.urlopen('http://localhost:8080/health', timeout=5)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
       interval: 20s
       timeout: 5s
       retries: 10
@@ -188,19 +123,11 @@ services:
       airflow-webserver:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
-    labels:
-      logging: promtail
-      app: airflow-scheduler
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${AIRFLOW_DB:-airflow}
-      AIRFLOW__METRICS__STATSD_ON: "true"
-      AIRFLOW__METRICS__STATSD_HOST: statsd-exporter
-      AIRFLOW__METRICS__STATSD_PORT: "9125"
-      AIRFLOW__METRICS__STATSD_PREFIX: airflow
-      AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX: /airflow
       DLT_DESTINATION_POSTGRES_CREDENTIALS__HOST: postgres
       DLT_DESTINATION_POSTGRES_CREDENTIALS__PORT: 5432
       DLT_DESTINATION_POSTGRES_CREDENTIALS__DATABASE: ${POSTGRES_DB:-datafoundry}
@@ -225,7 +152,6 @@ services:
     environment:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-9d0pXJ0nQ0M0r3xLw2QXxk8H9S3jY2y7jZr6jv7b6b4=}
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-datafoundry}:${POSTGRES_PASSWORD:-datafoundry}@postgres:5432/${AIRFLOW_DB:-airflow}
-      AIRFLOW__WEBSERVER__WEB_SERVER_URL_PREFIX: /airflow
       NYC_TAXI_URL: ${NYC_TAXI_URL:-https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet}
     volumes:
       - ./data/airflow:/opt/airflow
@@ -245,9 +171,6 @@ services:
   dlt:
     image: ghcr.io/dlt-hub/dlt:1.6.0
     profiles: ["tools"]
-    labels:
-      logging: promtail
-      app: dlt
     environment:
       DLT_LOG_LEVEL: INFO
       DLT_DB_DESTINATION: postgres
@@ -261,168 +184,6 @@ services:
     command: ["bash", "-c", "sleep infinity"]
     networks: [df]
 
-  nginx:
-    image: nginx:1.25
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    labels:
-      logging: promtail
-      app: nginx
-    volumes:
-      - ./scripts/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "8080:80"
-    networks: [df]
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost/ || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
-  loki:
-    image: grafana/loki:2.9.5
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    user: "0"
-    labels:
-      logging: promtail
-      app: loki
-    volumes:
-      - ./data/logging/loki:/loki
-      - ./scripts/logging/loki-config.yml:/etc/loki/config.yml:ro
-    command: ["-config.file=/etc/loki/config.yml"]
-    networks: [df]
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3100/ready || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
-  promtail:
-    image: grafana/promtail:2.9.5
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-      loki:
-        condition: service_healthy
-    environment:
-      DOCKER_API_VERSION: "1.44"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./data/logging/promtail:/promtail
-      - ./scripts/logging/promtail-config.yml:/etc/promtail/config.yml:ro
-    command: ["-config.file=/etc/promtail/config.yml"]
-    networks: [df]
-
-  grafana:
-    image: grafana/grafana:10.4.3
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-      loki:
-        condition: service_healthy
-      prometheus:
-        condition: service_healthy
-    user: "0"
-    labels:
-      logging: promtail
-      app: grafana
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
-      GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:8080/grafana/}
-      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
-    volumes:
-      - ./data/logging/grafana:/var/lib/grafana
-      - ./scripts/logging/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./scripts/logging/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./scripts/logging/grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./scripts/metrics/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources-metrics:ro
-      - ./scripts/metrics/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards-metrics:ro
-      - ./scripts/metrics/grafana/dashboards:/var/lib/grafana/dashboards-metrics:ro
-    networks: [df]
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/health || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
-  prometheus:
-    image: prom/prometheus:v2.52.0
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    user: "0"
-    labels:
-      logging: promtail
-      app: prometheus
-    volumes:
-      - ./data/metrics/prometheus:/prometheus
-      - ./scripts/metrics/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./scripts/metrics/alerts.yml:/etc/prometheus/alerts.yml:ro
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention.time=15d"
-    networks: [df]
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/ready || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
-  node-exporter:
-    image: prom/node-exporter:v1.8.1
-    restart: unless-stopped
-    profiles: ["linux"]
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    labels:
-      logging: promtail
-      app: node-exporter
-    pid: host
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - "--path.procfs=/host/proc"
-      - "--path.sysfs=/host/sys"
-      - "--path.rootfs=/rootfs"
-      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/.+)($|/)"
-    networks: [df]
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9100/metrics >/dev/null || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 10
-
-  alertmanager:
-    image: prom/alertmanager:v0.27.0
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    labels:
-      logging: promtail
-      app: alertmanager
-    volumes:
-      - ./data/metrics/alertmanager:/alertmanager
-      - ./scripts/metrics/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-    command:
-      - "--config.file=/etc/alertmanager/alertmanager.yml"
-      - "--storage.path=/alertmanager"
-    networks: [df]
-
   pgadmin:
     image: dpage/pgadmin4:8.12
     restart: unless-stopped
@@ -431,34 +192,22 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
-    labels:
-      logging: promtail
-      app: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin123}
       PGADMIN_LISTEN_PORT: 5050
-      PGADMIN_CONFIG_SCRIPT_NAME: "'/pgadmin'"
     volumes:
       - ./data/pgadmin:/var/lib/pgadmin
       - ./data/pgadmin/servers.json:/pgadmin4/servers.json:ro
       - ./data/pgadmin/pgpass:/var/lib/pgadmin/pgpass:ro
+    ports:
+      - "5050:5050"
     networks: [df]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:5050/ >/dev/null || exit 1"]
       interval: 20s
       timeout: 5s
       retries: 10
-  statsd-exporter:
-    image: prom/statsd-exporter:v0.26.1
-    restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
-    labels:
-      logging: promtail
-      app: statsd-exporter
-    networks: [df]
 
 networks:
   df: {}
