@@ -113,8 +113,6 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      setup:
-        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
@@ -166,9 +164,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      setup:
-        condition: service_completed_successfully
-      airflow-webserver:
+      postgres:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     environment:
@@ -203,7 +199,7 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     depends_on:
-      airflow-webserver:
+      postgres:
         condition: service_healthy
     user: "${AIRFLOW_UID:-50000}:0"
     environment:
@@ -231,8 +227,6 @@ services:
     image: apache/superset:2.1.0
     restart: unless-stopped
     depends_on:
-      setup:
-        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     environment:
@@ -272,9 +266,7 @@ services:
   loki:
     image: grafana/loki:2.9.5
     restart: unless-stopped
-    depends_on:
-      setup:
-        condition: service_completed_successfully
+    depends_on: {}
     volumes:
       - ./data/logging/loki:/loki
       - ./scripts/logging/loki-config.yml:/etc/loki/config.yml:ro
@@ -289,9 +281,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.5
     restart: unless-stopped
-    depends_on:
-      loki:
-        condition: service_healthy
+    depends_on: {}
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -308,9 +298,7 @@ services:
   grafana:
     image: grafana/grafana:10.4.3
     restart: unless-stopped
-    depends_on:
-      loki:
-        condition: service_healthy
+    depends_on: {}
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
