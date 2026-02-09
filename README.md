@@ -26,8 +26,13 @@ flowchart TD
   SS --> PG
   PGA --> PG
 
+  AF --> L["Container logs"]
+  SS --> L
+  PGA --> L
+  PG --> L
+
   subgraph Logs
-    L["Container logs"] --> PT["Promtail"] --> LK["Loki"] --> GF
+    L --> PT["Promtail"] --> LK["Loki"] --> GF
   end
 ```
 
