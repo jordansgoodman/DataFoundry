@@ -1,6 +1,6 @@
 # DataFoundry
 
-DataFoundry is a local‑first, fully open‑source analytics platform that installs a complete data + orchestration stack on a single machine with one command. It is designed to be self‑hosted, cloud‑independent, and repeatable.
+DataFoundry is a local‑first, fully open‑source analytics platform that installs a complete data + orchestration stack on a single machine with one command. It is designed to be self‑hosted, cloud‑independent, and repeatable for small teams.
 
 ## Core Principles
 - Local‑only, no cloud assumptions
@@ -10,7 +10,7 @@ DataFoundry is a local‑first, fully open‑source analytics platform that inst
 - Minimal configuration surface
 - One‑command install
 - Idempotent and repeatable
-- Designed for 100–1000+ business users on a single node
+- Designed for small teams running on a single node
 
 ## Architecture (Mermaid)
 ```mermaid
@@ -54,7 +54,7 @@ flowchart TD
 ## Quickstart
 1. Ensure Docker is running.
 2. Start the stack.
-3. Open Airflow, Superset, and pgAdmin.
+3. Open Airflow, Superset, and pgAdmin (and Grafana for logs).
 
 ```bash
 docker compose up -d
