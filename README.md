@@ -12,7 +12,7 @@ DataFoundry is a local‑first, fully open‑source analytics platform that inst
 - Idempotent and repeatable
 - Designed for small teams running on a single node
 
-## Architecture (Mermaid)
+## Architecture
 ```mermaid
 flowchart TD
   U["Users"] --> AF["Airflow (Web/Scheduler)"]
