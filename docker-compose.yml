@@ -244,7 +244,7 @@ services:
           --lastname User \
           --email "${SUPERSET_ADMIN_EMAIL:-superset@datafoundry.local}" || true
         superset init
-        gunicorn --bind 0.0.0.0:8088 \"superset.app:create_app()\"
+        gunicorn --bind 0.0.0.0:8088 'superset.app:create_app()'
     ports:
       - "8088:8088"
     networks: [df]
