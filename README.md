@@ -42,7 +42,7 @@ flowchart TD
 ## Quickstart
 1. Ensure Docker is running.
 2. Start the stack.
-3. Open Airflow and pgAdmin.
+3. Open Airflow, Superset, and pgAdmin.
 
 ```bash
 docker compose up -d
@@ -93,6 +93,19 @@ On first boot, Airflow triggers a full refresh ingestion of NYC Taxi data via dl
 Use Airflow to define new ingestion DAGs or extend the dlt scripts.
 - Add a new DAG under `airflow/dags/`
 - Use `dlt` to load data into Postgres schemas
+
+## Superset Database Connection
+Superset uses its own metadata DB automatically. To query your warehouse, add a Database connection in Superset:
+
+Connection string:
+```
+postgresql+psycopg2://datafoundry:<POSTGRES_PASSWORD>@postgres:5432/datafoundry
+```
+
+Notes:
+- Replace `<POSTGRES_PASSWORD>` with the value in `data/credentials.txt`
+- Database name is `datafoundry` by default (or `POSTGRES_DB` if you changed it)
+- Host must be `postgres` (the Docker service name), not `localhost`
 
 ## Common Commands
 Start:
