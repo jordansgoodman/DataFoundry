@@ -275,12 +275,6 @@ services:
     depends_on:
       setup:
         condition: service_completed_successfully
-      airflow-webserver:
-        condition: service_healthy
-      pgadmin:
-        condition: service_healthy
-      superset:
-        condition: service_healthy
     volumes:
       - ./data/logging/loki:/loki
       - ./scripts/logging/loki-config.yml:/etc/loki/config.yml:ro
