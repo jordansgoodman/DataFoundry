@@ -1,7 +1,12 @@
-.PHONY: up down logs restart dev-venv
+.PHONY: env creds up down logs restart dev-venv
 
-up:
-	./bootstrap.sh
+env:
+	python3 ./scripts/setup/generate_env.py
+
+creds: env
+
+up: env
+	docker compose up -d
 
 down:
 	docker compose down

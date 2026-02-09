@@ -94,8 +94,13 @@ Key variables:
 - `NYC_TAXI_URL`
 
 ## Credentials
-On first run, credentials are written to:
+Credentials are written to:
 - `data/credentials.txt`
+
+Generate/refresh credentials:
+```bash
+make creds
+```
 
 ## Data Ingestion (NYC Taxi)
 On first boot, Airflow triggers a full refresh ingestion of NYC Taxi data via dlt.
